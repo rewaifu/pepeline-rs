@@ -1,9 +1,8 @@
 # pipeline-rs
 Fast rust-python librarian for internal needs of an organization
 ```py
-from pepeline import read_gray, screenton, fast_color_level,normolize #read - read color image rgb8
+from pepeline import read_gray, screenton, fast_color_level,normolize,save #read - read color image rgb8
 import numpy as np
-import cv2
 img = np.array(read_gray(<"img path">)).astype(np.float32)/255
 img = normolize(img) #img - only array f32 
 img = fast_color_level(
@@ -15,4 +14,4 @@ img = fast_color_level(
     gamma = 1.0
 )
 img = screenton(img, dot_size=7)
-cv2.imwrite("out.png", img * 255)
+save((img * 255).astype(np.uint8), "out2.png")
