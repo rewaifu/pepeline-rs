@@ -14,3 +14,7 @@ img = fast_color_level(
 )
 img = screenton(img, dot_size=7)
 save((img * 255).astype(np.uint8), "out2.png")
+```
+# TODO:
+- resize❓
+- sharp♻️
