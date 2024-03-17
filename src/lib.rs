@@ -57,7 +57,6 @@ fn pepeline(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(read, m)?)?;
     m.add_function(wrap_pyfunction!(screenton, m)?)?;
     m.add_function(wrap_pyfunction!(fast_color_level, m)?)?;
-    m.add_function(wrap_pyfunction!(normolize, m)?)?;
     m.add_function(wrap_pyfunction!(save, m)?)?;
     Ok(())
 }

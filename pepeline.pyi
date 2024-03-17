@@ -21,9 +21,7 @@ def fast_color_level(
         out_high: int,
         gamma: float,
 )->np.ndarray: " array:np.float32 \n in_low...out_high:uint8 \n gamma:float32"
-def normolize(
-        array: np.ndarray
-)->np.ndarray:"array:np.float32"
+
 def save(
         array: np.ndarray,
         path:str
