@@ -18,6 +18,7 @@ save((img * 255).astype(np.uint8), "out2.png")
 # TODO:
 - resize❓
 - sharp♻️
+- documentation ♻️
 # Function:
 - read - read rgb img.
 - read_gray - reag gray img.
