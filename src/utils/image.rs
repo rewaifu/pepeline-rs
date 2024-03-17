@@ -1,6 +1,6 @@
 use std::path::Path;
 use image::{ImageBuffer, Luma, Rgb, RgbImage};
-use ndarray::{Array2, Array3, ArrayD};
+use ndarray::{Array2, Array3, ArrayD, Axis};
 use numpy::PyReadonlyArrayDyn;
 use pyo3::{pyfunction};
 fn array_gray2image(array:ArrayD<u8>,shape:&[usize])->ImageBuffer<Luma<u8>,Vec<u8>>{
@@ -16,6 +16,7 @@ fn array_gray2image(array:ArrayD<u8>,shape:&[usize])->ImageBuffer<Luma<u8>,Vec<u
 
 }
 fn array_rgb2image(array: ArrayD<u8>,shape:&[usize]) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+
     let (w, h) = (shape[1] as u32, shape[0] as u32);
     let raw = array.into_raw_vec();
 
@@ -51,11 +52,18 @@ pub fn save(
             img.save(Path::new(&out_path)).expect("Not Save");
         }
         3 => {
-            let img = array_rgb2image(array.clone(),&shape);
-            img.save(Path::new(&out_path)).expect("Not Save");
-        }
+            match shape[2]{
+                3=>{let img = array_rgb2image(array.clone(),&shape);
+                img.save(Path::new(&out_path)).expect("Not Save");}
+                1=>{
+                    let array = array.clone().remove_axis(Axis(2)).into_owned();
+                let img = array_gray2image(array,&shape);
+                img.save(Path::new(&out_path)).expect("Not Save");
+                }
+                _=>{panic!("color channel error")}
+        }}
 
-        _ => {panic!("Массив должен быть двумерным или трехмерным")}
+        _ => {panic!("The array must be 2D or 3D")}
     }
 
 }
