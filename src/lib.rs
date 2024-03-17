@@ -3,7 +3,7 @@ mod utils;
 use std::path::Path;
 use utils::image::{rgb_img_open, gray_img_open,save};
 use utils::screenton::screenton_add;
-use utils::color_level::{levels,normolize};
+use utils::color_level::levels;
 use numpy::{PyArray2, ToPyArray, PyArray3, PyReadonlyArray2, PyReadonlyArrayDyn, PyArrayDyn};
 use pyo3::prelude::*;
 
