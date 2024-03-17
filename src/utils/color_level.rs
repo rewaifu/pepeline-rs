@@ -20,7 +20,6 @@ pub fn levels(
 
 }
 #[pyfunction]
-#[pyo3(signature = (input), text_signature = "array")]
 pub fn normolize(
     input: PyReadonlyArrayDyn<f32>,
     py: Python

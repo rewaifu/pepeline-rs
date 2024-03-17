@@ -1,7 +1,7 @@
 mod utils;
 
 use std::path::Path;
-use utils::image::{rgb_img_open, gray_img_open};
+use utils::image::{rgb_img_open, gray_img_open,save};
 use utils::screenton::screenton_add;
 use utils::color_level::{levels,normolize};
 use numpy::{PyArray2, ToPyArray, PyArray3, PyReadonlyArray2, PyReadonlyArrayDyn, PyArrayDyn};
@@ -58,5 +58,6 @@ fn pepeline(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(screenton, m)?)?;
     m.add_function(wrap_pyfunction!(fast_color_level, m)?)?;
     m.add_function(wrap_pyfunction!(normolize, m)?)?;
+    m.add_function(wrap_pyfunction!(save, m)?)?;
     Ok(())
 }
