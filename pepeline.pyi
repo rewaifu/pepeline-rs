@@ -18,11 +18,11 @@ def screenton(
 )->np.ndarray:"array:np.float32\n dot_size:uint,ly and lx_plus: uint, if None == dot_size//2 "
 def fast_color_level(
         array: np.ndarray,
-        in_low: int,
-        in_high: int,
-        out_low: int,
-        out_high: int,
-        gamma: float,
+        in_low: int|None,
+        in_high: int|None,
+        out_low: int|None,
+        out_high: int|None,
+        gamma: float|None,
 )->np.ndarray: " array:np.float32 \n in_low...out_high:uint8 \n gamma:float32"
 
 def save(
