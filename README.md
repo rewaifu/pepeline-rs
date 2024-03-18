@@ -20,6 +20,8 @@ save32(img, "out.png")
 - sharp♻️
 - documentation ♻️
 - refactoring ♻️
+- add tests♻️
+- add benchmarks screepts♻️
 # Function:
 - read - read img u8.
 - read32 - read img float32.
