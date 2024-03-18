@@ -6,6 +6,10 @@ def read(
         path:str,
         mode:int|None
 )->np.ndarray: "open image\n mode 0 = Gray 1 = Color"
+def read32(
+        path:str,
+        mode:int|None
+)->np.ndarray: "open image\n mode 0 = Gray 1 = Color"
 def screenton(
         array:np.ndarray,
         dot_size:int,
