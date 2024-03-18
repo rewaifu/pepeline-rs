@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import numpy as np
-def read_gray(
-        path:str
-)->np.ndarray: "open gray image"
+
 def read(
-        path:str
-)->np.ndarray: "open rgb image"
+        path:str,
+        mode:int|None
+)->np.ndarray: "open image\n mode 0 = Gray 1 = Color"
 def screenton(
         array:np.ndarray,
         dot_size:int,

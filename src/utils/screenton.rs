@@ -1,4 +1,6 @@
 use ndarray::Array2;
+use numpy::{PyArray2, PyReadonlyArray2, ToPyArray};
+use pyo3::{Py, pyfunction, PyResult, Python};
 
 const X: f32 = 0.1;
 const Y: f32 = 0.15;
@@ -49,7 +51,7 @@ fn create_dot(dot_size: usize) -> (Array2<f32>, Array2<f32>) {
     return (dot, dot_inv);
 }
 
-pub fn screenton_add(
+fn screenton_add(
     array: &mut Array2<f32>,
     dot_size: usize,
     ly_plus:usize,
@@ -78,4 +80,18 @@ pub fn screenton_add(
             }
         }
     }
+}
+#[pyfunction]
+pub fn screenton<'py>(input: PyReadonlyArray2<f32>,dot_size: usize, lx_plus: Option<usize>, ly_plus: Option<usize>, py: Python) -> PyResult<Py<PyArray2<f32>>> {
+    let lx_plus = match lx_plus {
+        Some(val) => val,
+        None => dot_size / 2,
+    };
+    let ly_plus = match ly_plus {
+        Some(val) => val,
+        None => dot_size / 2,
+    };
+    let mut array = input.as_array().to_owned();
+    screenton_add(&mut array,dot_size,ly_plus,lx_plus);
+    Ok(array.to_pyarray(py).to_owned())
 }
