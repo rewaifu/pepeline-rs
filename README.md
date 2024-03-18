@@ -3,7 +3,7 @@ Fast rust-python librarian for internal needs of an organization
 ```py
 from pepeline import screenton, fast_color_level, save, read
 import numpy as np
-img = np.array(read(<"img path">),0).astype(np.float32)/255
+img = np.array(read(<"img path">,0)).astype(np.float32)/255
 img = fast_color_level(
     img,     
     in_low = 10,
