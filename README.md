@@ -26,4 +26,4 @@ save((img * 255).astype(np.uint8), "out2.png")
 - screenton - add screenton patern.
 - fast_color_level - color levels correction
 - save - fast save image
-- save - fast save image float32
+- save32 - fast save image float32
