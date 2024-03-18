@@ -13,7 +13,7 @@ img = fast_color_level(
     gamma = 1.0
 )
 img = screenton(img, dot_size=7)
-save32((mg, "out.png")
+save32(img, "out.png")
 ```
 # TODO:
 - resize❓
