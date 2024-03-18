@@ -29,3 +29,7 @@ def save(
         array: np.ndarray,
         path:str
 )->np.ndarray:"array:np.uint8"
+def save32(
+        array: np.ndarray,
+        path:str
+)->np.ndarray:"array:np.float32"
