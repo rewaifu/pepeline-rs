@@ -21,8 +21,9 @@ save((img * 255).astype(np.uint8), "out2.png")
 - documentation ♻️
 - refactoring ♻️
 # Function:
-- read - read rgb img.
-- read_gray - reag gray img.
+- read - read img u8.
+- read32 - read img float32.
 - screenton - add screenton patern.
 - fast_color_level - color levels correction
 - save - fast save image
+- save - fast save image float32
