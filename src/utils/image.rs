@@ -3,19 +3,21 @@ use image::{GrayImage, ImageBuffer, Luma, Rgb, RgbImage};
 use ndarray::{Array2, Array3, ArrayD, Axis, IxDyn};
 use numpy::{PyArray, PyReadonlyArrayDyn, ToPyArray};
 use pyo3::{Py, pyfunction, PyResult, Python};
-fn u8_to_f32(bytes: &[u8]) -> Vec<f32> {
-    // Создаем вектор для хранения результата с заранее известной ёмкостью
-    let mut floats = Vec::with_capacity(bytes.len());
+use zune_jpeg::JpegDecoder;
+use zune_jpeg::zune_core::colorspace::ColorSpace;
+use zune_jpeg::zune_core::options::DecoderOptions;
 
-    // Выполняем преобразование, нормализуя значения в диапазоне от 0 до 1
-    floats.extend(bytes.iter().map(|&byte| byte as f32 / 255.0));
+fn u8_to_f32(bytes: &[u8]) -> Vec<f32> {
+    let mut floats = vec![0.0; bytes.len()];
+    floats.iter_mut().zip(bytes.iter()).for_each(|(f, &b)| *f = if b == 0 { b as f32 } else { b as f32 / 255.0 });
 
     floats
 }
+
 fn f32_to_u8(bytes: &[f32]) -> Vec<u8> {
     // Создаем вектор для хранения результата с заранее известной ёмкостью
-    let mut floats = Vec::with_capacity(bytes.len());
-
+    let mut floats = vec![0; bytes.len()];
+    floats.iter_mut().zip(bytes.iter()).for_each(|(f, &b)| *f = if b == 0.0 {b as u8} else { (b* 255.0) as u8 });
     // Выполняем преобразование, нормализуя значения в диапазоне от 0 до 1
     floats.extend(bytes.iter().map(|&byte| (byte * 255.0) as u8));
 
@@ -105,6 +107,44 @@ fn gray_img_open(path:&Path)->Array2<u8>{
     let img = image::open(path).unwrap().into_luma8();
     luma2array(img)
 }
+fn jpg_gray_img_open(path:&Path)->Array2<u8>{
+    let file_contents = std::fs::read(path).unwrap();
+    let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::Luma);
+    let mut decoder = JpegDecoder::new_with_options(&file_contents,options);
+    decoder.decode_headers().unwrap();
+    let image_info = decoder.info().unwrap();
+    let pixels = decoder.decode().unwrap();
+    Array2::from_shape_vec((image_info.height as usize, image_info.width as usize),pixels).unwrap()
+}
+fn jpg_rgb_img_open(path:&Path)->Array3<u8>{
+    let file_contents = std::fs::read(path).unwrap();
+    let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::RGB);
+    let mut decoder = JpegDecoder::new_with_options(&file_contents,options);
+    decoder.decode_headers().unwrap();
+    let image_info = decoder.info().unwrap();
+    let pixels = decoder.decode().unwrap();
+    Array3::from_shape_vec((image_info.height as usize, image_info.width as usize,3),pixels).unwrap()
+}
+fn jpg_gray_img_openf32(path:&Path)->Array2<f32>{
+    let file_contents = std::fs::read(path).unwrap();
+    let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::Luma);
+    let mut decoder = JpegDecoder::new_with_options(&file_contents,options);
+    decoder.decode_headers().unwrap();
+    let image_info = decoder.info().unwrap();
+    let pixels = decoder.decode().unwrap();
+    let pixels = u8_to_f32(&pixels);
+    Array2::from_shape_vec((image_info.height as usize, image_info.width as usize),pixels).unwrap()
+}
+fn jpg_rgb_img_openf32(path:&Path)->Array3<f32>{
+    let file_contents = std::fs::read(path).unwrap();
+    let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::RGB);
+    let mut decoder = JpegDecoder::new_with_options(&file_contents,options);
+    decoder.decode_headers().unwrap();
+    let image_info = decoder.info().unwrap();
+    let pixels = decoder.decode().unwrap();
+    let pixels = u8_to_f32(&pixels);
+    Array3::from_shape_vec((image_info.height as usize, image_info.width as usize,3),pixels).unwrap()
+}
 fn rgb_img_open(path:&Path)->Array3<u8>{
     let img = image::open(path).unwrap().into_rgb8();
     rgb2array(img)
@@ -113,7 +153,7 @@ fn rgb_img_openf32(path:&Path)->Array3<f32>{
     let img = image::open(path).unwrap().into_rgb8();
     rgb2arrayf32(img)
 }
-fn luma_img_openf32(path:&Path)->Array2<f32>{
+fn gray_img_openf32(path:&Path)->Array2<f32>{
     let img = image::open(path).unwrap().into_luma8();
     luma2arrayf32(img)
 }
@@ -182,20 +222,49 @@ pub fn save32(
 #[pyfunction]
 pub fn read<'py>(path: String, mode: Option<u8>, py: Python) -> PyResult<Py<PyArray<u8, IxDyn>>> {
     // reads the image using one of the modes, currently 0-gray8 mode=>1 rgb8
+    let path = Path::new(&path);
+    let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("error");
+
     let mode = mode.unwrap_or(1u8);
-    let array = match mode {
-        0 => gray_img_open(Path::new(&path)).into_dyn(),
-        _ => rgb_img_open(Path::new(&path)).into_dyn(),
+    let array = match extension {
+        "jpg"|"jpeg"=>{match mode {
+            0 => jpg_gray_img_open(Path::new(&path)).into_dyn(),
+            _ => jpg_rgb_img_open(Path::new(&path)).into_dyn(),
+        }
+
+        }
+        "error"=>panic!("no_file"),
+        _=>{match mode {
+            0 => gray_img_open(Path::new(&path)).into_dyn(),
+            _ => rgb_img_open(Path::new(&path)).into_dyn(),
+        }}
+
+
     };
+
     Ok(array.to_pyarray(py).into())
 }
 #[pyfunction]
 pub fn read32<'py>(path: String, mode: Option<u8>, py: Python) -> PyResult<Py<PyArray<f32, IxDyn>>> {
     // reads the image using one of the modes, currently 0-gray8 mode=>1 rgb8
+    let path = Path::new(&path);
+    let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("error");
+
     let mode = mode.unwrap_or(1u8);
-    let array = match mode {
-        0 => luma_img_openf32(Path::new(&path)).into_dyn(),
-        _ => rgb_img_openf32(Path::new(&path)).into_dyn(),
+    let array = match extension {
+        "jpg"|"jpeg"=>{match mode {
+            0 => jpg_gray_img_openf32(Path::new(&path)).into_dyn(),
+            _ => jpg_rgb_img_openf32(Path::new(&path)).into_dyn(),
+        }
+
+        }
+        "error"=>panic!("no_file"),
+        _=>{match mode {
+            0 => gray_img_openf32(Path::new(&path)).into_dyn(),
+            _ => rgb_img_openf32(Path::new(&path)).into_dyn(),
+        }}
+
+
     };
     Ok(array.to_pyarray(py).into())
 }
