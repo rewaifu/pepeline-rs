@@ -23,8 +23,8 @@ save32(img, "out.png")
 - add tests♻️
 - add benchmarks scripts♻️
 # Function:
-- read - read img u8.
-- read32 - read img float32.
+- read - read img u8.(supports psd)
+- read32 - read img float32.(supports psd)
 - screenton - add screenton patern.
 - fast_color_level - color levels correction
 - save - fast save image
