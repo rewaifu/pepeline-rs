@@ -1,3 +1,8 @@
+[pypl](https://pypi.org/project/pepeline/)
+
+[git](https://github.com/scanlate-wiki/pipeline-rs)
+
+
 # pipeline-rs
 Fast rust-python librarian for internal needs of an organization
 ```py
