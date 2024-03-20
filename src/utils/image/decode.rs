@@ -1,6 +1,6 @@
 use std::fs::read;
 use std::path::Path;
-use ndarray::{Array2, Array3};
+use ndarray::{Array2, Array3, ArrayD};
 use zune_jpeg::JpegDecoder;
 use zune_jpeg::zune_core::colorspace::ColorSpace;
 use zune_jpeg::zune_core::options::DecoderOptions;
@@ -88,9 +88,7 @@ pub (crate)fn psd_rgb_decode(path: &Path)->Array3<u8>{
         let mut rgb_values = Vec::with_capacity(px.len() * 3);
 
         for gray in &px {
-            rgb_values.push(*gray);
-            rgb_values.push(*gray);
-            rgb_values.push(*gray);
+            rgb_values.extend([*gray, *gray, *gray].iter().copied());
         }
         Array3::from_shape_vec((height as usize, width as usize,3),rgb_values).unwrap()
     }
@@ -131,10 +129,8 @@ pub (crate)fn psd_rgb32_decode(path: &Path)->Array3<f32>{
         let mut rgb_values:Vec<f32> = Vec::with_capacity(px.len() * 3);
 
         for gray in &px {
-            let gray = *gray as f32/255.0;
-            rgb_values.push(gray );
-            rgb_values.push(gray );
-            rgb_values.push(gray );
+            let gray_f32 = *gray as f32 *  0.00392156862745f32;
+            rgb_values.extend([gray_f32, gray_f32, gray_f32].iter().copied());
         }
         Array3::from_shape_vec((height as usize, width as usize,3),rgb_values).unwrap()
     }
@@ -142,4 +138,35 @@ pub (crate)fn psd_rgb32_decode(path: &Path)->Array3<f32>{
         let px = u8_to_f32(&px);
         Array3::from_shape_vec((height as usize, width as usize,3),px).unwrap()
     }
+}
+pub (crate)fn psd_din_decode(path: &Path)->ArrayD<u8>{
+    let img = read(path).unwrap();
+    let size_bites : &[u8] = &img[14..22];
+    let channels  = img[13] as usize;
+    let mut decoder = PSDDecoder::new(&img);
+    let px = decoder.decode_raw().unwrap();
+    let (height,width) = decode_size_psd(size_bites);
+    if channels == 1 {
+        Array2::from_shape_vec((height as usize, width as usize), px).unwrap().into_dyn()
+    }else {
+        Array3::from_shape_vec((height as usize, width as usize,channels),px).unwrap().into_dyn()
+    }
+
+
+}
+pub (crate)fn psd_din32_decode(path: &Path)->ArrayD<f32>{
+    let img = read(path).unwrap();
+    let size_bites : &[u8] = &img[14..22];
+    let channels  = img[13] as usize;
+    let mut decoder = PSDDecoder::new(&img);
+    let px = decoder.decode_raw().unwrap();
+    let (height,width) = decode_size_psd(size_bites);
+    let px = u8_to_f32(&px);
+    if channels == 1 {
+        Array2::from_shape_vec((height as usize, width as usize), px).unwrap().into_dyn()
+    }
+    else {
+        Array3::from_shape_vec((height as usize, width as usize,channels),px).unwrap().into_dyn()
+    }
+
 }

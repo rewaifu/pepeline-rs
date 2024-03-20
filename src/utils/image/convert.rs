@@ -13,7 +13,7 @@ pub(crate)fn rgb8_to_gray32(rgb: (u8, u8, u8)) -> f32 {
 }
 pub(crate) fn u8_to_f32(bytes: &[u8]) -> Vec<f32> {
     let mut floats = vec![0.0; bytes.len()];
-    floats.iter_mut().zip(bytes.iter()).for_each(|(f, &b)| *f = if b == 0 { b as f32 } else { b as f32 / 255.0 });
+    floats.iter_mut().zip(bytes.iter()).for_each(|(f, &b)| *f = if b == 0 { b as f32 } else { b as f32 *  0.00392156862745f32 });
 
     floats
 }

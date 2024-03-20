@@ -3,7 +3,7 @@ use ndarray::{Axis, IxDyn};
 use numpy::{PyArray, PyReadonlyArrayDyn, ToPyArray};
 use pyo3::{Py, pyfunction, PyResult, Python};
 use crate::utils::image::convert::{array_gray2image, array_grayf32_to_image, array_rgb2image, array_rgbf32_to_image, gray_img_open, gray_img_openf32, rgb_img_open, rgb_img_openf32};
-use crate::utils::image::decode::{jpg_gray_img_open, jpg_gray_img_openf32, jpg_rgb_img_open, jpg_rgb_img_openf32, psd_gray32_decode, psd_gray_decode, psd_rgb32_decode, psd_rgb_decode};
+use crate::utils::image::decode::{jpg_gray_img_open, jpg_gray_img_openf32, jpg_rgb_img_open, jpg_rgb_img_openf32, psd_din32_decode, psd_din_decode, psd_gray32_decode, psd_gray_decode, psd_rgb32_decode, psd_rgb_decode};
 
 #[pyfunction]
 pub fn save(
@@ -71,7 +71,7 @@ pub fn read<'py>(path: String, mode: Option<u8>, py: Python) -> PyResult<Py<PyAr
     let path = Path::new(&path);
     let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("error");
 
-    let mode = mode.unwrap_or(1u8);
+    let mode = mode.unwrap_or(2u8);
     let array = match extension {
         "jpg"|"jpeg"=>{match mode {
             0 => jpg_gray_img_open(Path::new(&path)).into_dyn(),
@@ -81,7 +81,8 @@ pub fn read<'py>(path: String, mode: Option<u8>, py: Python) -> PyResult<Py<PyAr
         }
         "psd"|"PSD"=>{match mode {
             0 => psd_gray_decode(Path::new(&path)).into_dyn(),
-            _ => psd_rgb_decode(Path::new(&path)).into_dyn(),
+            1 => psd_rgb_decode(Path::new(&path)).into_dyn(),
+            _ => psd_din_decode(Path::new(&path)),
         }
         }
 
@@ -102,7 +103,7 @@ pub fn read32<'py>(path: String, mode: Option<u8>, py: Python) -> PyResult<Py<Py
     let path = Path::new(&path);
     let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("error");
 
-    let mode = mode.unwrap_or(1u8);
+    let mode = mode.unwrap_or(2u8);
     let array = match extension {
         "jpg"|"jpeg"=>{match mode {
             0 => jpg_gray_img_openf32(Path::new(&path)).into_dyn(),
@@ -112,7 +113,8 @@ pub fn read32<'py>(path: String, mode: Option<u8>, py: Python) -> PyResult<Py<Py
         }
         "psd"|"PSD"=>{match mode {
             0 => psd_gray32_decode(Path::new(&path)).into_dyn(),
-            _ => psd_rgb32_decode(Path::new(&path)).into_dyn(),
+            1 => psd_rgb32_decode(Path::new(&path)).into_dyn(),
+            _ => psd_din32_decode(Path::new(&path)),
         }
         }
         "error"=>panic!("no_file"),
