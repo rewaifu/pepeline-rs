@@ -10,7 +10,7 @@ def read32(
         path:str,
         mode:int|None
 )->np.ndarray: "open image\n mode 0 = Gray 1 = Color"
-def screenton(
+def screentone(
         array:np.ndarray,
         dot_size:int,
         ly_plus:int|None,
