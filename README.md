@@ -1,8 +1,12 @@
+[pypl](https://pypi.org/project/pepeline/)
+
+[git](https://github.com/scanlate-wiki/pipeline-rs)
+
+
 # pipeline-rs
 Fast rust-python librarian for internal needs of an organization
 ```py
 from pepeline import screentone, fast_color_level,save32,read32
-import numpy as np
 img = read32(<"img path">,0)
 img = fast_color_level(
     img,     
