@@ -1,5 +1,4 @@
 mod utils;
-
 use utils::image::function::{save,read,read32,save32};
 use utils::screentone::screentone;
 use utils::color_level::fast_color_level;
