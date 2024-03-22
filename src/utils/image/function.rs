@@ -1,9 +1,9 @@
 use std::path::Path;
-use ndarray::{Array2, Array3, Axis, IxDyn};
+use ndarray::{Axis, IxDyn};
 use numpy::{PyArray, PyReadonlyArrayDyn, ToPyArray};
 use pyo3::{Py, pyfunction, PyResult, Python};
-use crate::utils::image::convert::{array_gray2image, array_grayf32_to_image, array_rgb2image, array_rgbf32_to_image, gray_img_open, gray_img_openf32, rgb8_to_gray32, rgb8_to_gray8, rgb_img_open, rgb_img_openf32, u8_to_f32};
-use crate::utils::image::decode::{jpg_gray_img_open, jpg_gray_img_openf32, jpg_rgb_img_open, jpg_rgb_img_openf32, psd_din32_decode, psd_din_decode, psd_gray32_decode, psd_gray_decode, psd_rgb32_decode, psd_rgb_decode,webp_decode};
+use crate::utils::image::convert::{array_gray2image, array_grayf32_to_image, array_rgb2image, array_rgbf32_to_image, gray_img_open, gray_img_openf32, rgb_img_open, rgb_img_openf32};
+use crate::utils::image::decode::{jpg_gray_img_open, jpg_gray_img_openf32, jpg_rgb_img_open, jpg_rgb_img_openf32, psd_din32_decode, psd_din_decode, psd_gray32_decode, psd_gray_decode, psd_rgb32_decode, psd_rgb_decode};
 
 #[pyfunction]
 pub fn save(
@@ -85,23 +85,6 @@ pub fn read<'py>(path: String, mode: Option<u8>, py: Python) -> PyResult<Py<PyAr
             _ => psd_din_decode(Path::new(&path)),
         }
         }
-        "webp"=>{match mode {
-            0 => {
-                let (px,w,h) = webp_decode(Path::new(&path));
-                let mut gray_values = Vec::with_capacity(px.len() / 3);
-                for chunk in px.chunks(3) {
-                    let rgb = (chunk[0], chunk[1], chunk[2]);
-                    let gray = rgb8_to_gray8(rgb);
-                    gray_values.push(gray);
-                }
-                Array2::from_shape_vec((h as usize, w as usize), gray_values).unwrap().into_dyn()
-            },
-            _ => {
-                let (px,w,h) = webp_decode(Path::new(&path));
-                Array3::from_shape_vec((h as usize, w as usize,3), px).unwrap().into_dyn()
-            },
-        }
-        }
 
         "error"=>panic!("no_file"),
         _=>{match mode {
@@ -134,26 +117,6 @@ pub fn read32<'py>(path: String, mode: Option<u8>, py: Python) -> PyResult<Py<Py
             _ => psd_din32_decode(Path::new(&path)),
         }
         }
-
-        "webp"=> {
-            match mode {
-                0 => {
-                    let (px, w, h) = webp_decode(Path::new(&path));
-                    let mut gray_values = Vec::with_capacity(px.len() / 3);
-                    for chunk in px.chunks(3) {
-                        let rgb = (chunk[0], chunk[1], chunk[2]);
-                        let gray = rgb8_to_gray32(rgb);
-                        gray_values.push(gray);
-                    }
-                    Array2::from_shape_vec((h as usize, w as usize), gray_values).unwrap().into_dyn()
-                },
-                _ => {
-                    let (px, w, h) = webp_decode(Path::new(&path));
-                    let f32_px = u8_to_f32(&px);
-                    Array3::from_shape_vec((h as usize, w as usize,3), f32_px).unwrap().into_dyn()
-                },
-            }
-    }
         "error"=>panic!("no_file"),
         _=>{match mode {
             0 => gray_img_openf32(Path::new(&path)).into_dyn(),

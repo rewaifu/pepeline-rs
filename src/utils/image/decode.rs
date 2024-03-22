@@ -1,6 +1,5 @@
 use std::fs::read;
 use std::path::Path;
-use filebuffer::FileBuffer;
 use ndarray::{Array2, Array3, ArrayD};
 use zune_jpeg::JpegDecoder;
 use zune_jpeg::zune_core::colorspace::ColorSpace;
@@ -170,10 +169,4 @@ pub (crate)fn psd_din32_decode(path: &Path)->ArrayD<f32>{
         Array3::from_shape_vec((height as usize, width as usize,channels),px).unwrap().into_dyn()
     }
 
-}
-pub (crate)fn webp_decode(path: &Path)->(Vec<u8>,u32,u32){
-    let img = &FileBuffer::open(path).unwrap().to_vec();
-    let web_dec = webp::Decoder::new(img).decode().unwrap();
-    let (w,h) = (web_dec.width(),web_dec.height());
-    (web_dec.to_vec(),w,h)
 }
