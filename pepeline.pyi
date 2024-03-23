@@ -4,11 +4,8 @@ import numpy as np
 
 def read(
         path:str,
-        mode:int|None
-)->np.ndarray: "open image\n mode 0 = Gray 1 = Color"
-def read32(
-        path:str,
-        mode:int|None
+        mode:int|None,
+        f32:bool|None
 )->np.ndarray: "open image\n mode 0 = Gray 1 = Color"
 def screentone(
         array:np.ndarray,
@@ -29,7 +26,3 @@ def save(
         array: np.ndarray,
         path:str
 )->np.ndarray:"array:np.uint8"
-def save32(
-        array: np.ndarray,
-        path:str
-)->np.ndarray:"array:np.float32"

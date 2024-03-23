@@ -19,12 +19,8 @@ pub(crate) fn u8_to_f32(bytes: &[u8]) -> Vec<f32> {
 }
 
 pub(crate)fn f32_to_u8(bytes: &[f32]) -> Vec<u8> {
-    // Создаем вектор для хранения результата с заранее известной ёмкостью
     let mut floats = vec![0; bytes.len()];
-    floats.iter_mut().zip(bytes.iter()).for_each(|(f, &b)| *f = if b == 0.0 {b as u8} else { (b* 255.0) as u8 });
-    // Выполняем преобразование, нормализуя значения в диапазоне от 0 до 1
-    floats.extend(bytes.iter().map(|&byte| (byte * 255.0) as u8));
-
+    floats.iter_mut().zip(bytes.iter()).for_each(|(f, &b)| *f = if b == 0.0 { b as u8 } else { (b*  255.0)as u8 });
     floats
 }
 
