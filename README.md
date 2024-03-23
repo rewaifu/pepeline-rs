@@ -21,7 +21,6 @@ save32(img, "out.png")
 ```
 # TODO:
 - resize❓
-- sharp♻️
 - documentation ♻️
 - refactoring ♻️
 - add tests♻️
