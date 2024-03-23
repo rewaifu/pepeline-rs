@@ -5,7 +5,7 @@ import numpy as np
 def read(
         path:str,
         mode:int|None,
-        f32:bool|None
+        format:int|None
 )->np.ndarray: "open image\n mode 0 = Gray 1 = Color"
 def screentone(
         array:np.ndarray,

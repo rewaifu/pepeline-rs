@@ -1,6 +1,6 @@
 use std::path::Path;
-use image::{GrayImage, ImageBuffer, Luma, Rgb, RgbImage};
-use ndarray::{Array2, Array3, ArrayD};
+use image::{GrayImage, RgbImage};
+use ndarray::{Array2, Array3};
 pub(crate)fn rgb8_to_gray8(rgb: (u8, u8, u8)) -> u8 {
     let (r, g, b) = rgb;
     let gray = (r as f32 * 0.114 + g as f32 * 0.587 + b as f32 * 0.299)as u8 ;
@@ -24,45 +24,45 @@ pub(crate)fn f32_to_u8(bytes: &[f32]) -> Vec<u8> {
     floats
 }
 
-pub(crate)fn array_gray2image(array:ArrayD<u8>,shape:&[usize])->ImageBuffer<Luma<u8>,Vec<u8>>{
-    let array2: Array2<u8> = array.into_dimensionality().unwrap();
-    let (w, h) = (shape[1] as u32, shape[0] as u32);
-    ImageBuffer::from_fn(
-        w,
-        h,
-        |x, y| {
-            let value = array2[[y as usize, x as usize]];
-            Luma([value])
-        })
-
-}
-pub(crate)fn array_rgb2image(array: ArrayD<u8>,shape:&[usize]) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
-
-    let (w, h) = (shape[1] as u32, shape[0] as u32);
-    let raw = array.into_raw_vec();
-
-    RgbImage::from_raw(w , h, raw)
-        .expect("container should have the right size for the image dimensions")
-
-
-}
-pub(crate)fn array_grayf32_to_image(array:ArrayD<f32>,shape:&[usize])->ImageBuffer<Luma<u8>,Vec<u8>>{
-    let vec: Vec<f32>=array.into_raw_vec();
-    let vec_u8:Vec<u8>=f32_to_u8(&vec);
-    let (w, h) = (shape[1] as u32, shape[0] as u32);
-    ImageBuffer::from_fn(w, h, move |x, y| Luma([vec_u8[(y * w + x) as usize]]))
-}
-pub(crate)fn array_rgbf32_to_image(array: ArrayD<f32>,shape:&[usize]) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
-
-    let (w, h) = (shape[1] as u32, shape[0] as u32);
-    let raw = array.into_raw_vec();
-    let raw = f32_to_u8(&raw);
-
-    RgbImage::from_raw(w , h, raw)
-        .expect("container should have the right size for the image dimensions")
-
-
-}
+// pub(crate)fn array_gray2image(array:ArrayD<u8>,shape:&[usize])->ImageBuffer<Luma<u8>,Vec<u8>>{
+//     let array2: Array2<u8> = array.into_dimensionality().unwrap();
+//     let (w, h) = (shape[1] as u32, shape[0] as u32);
+//     ImageBuffer::from_fn(
+//         w,
+//         h,
+//         |x, y| {
+//             let value = array2[[y as usize, x as usize]];
+//             Luma([value])
+//         })
+//
+// }
+// pub(crate)fn array_rgb2image(array: ArrayD<u8>,shape:&[usize]) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+//
+//     let (w, h) = (shape[1] as u32, shape[0] as u32);
+//     let raw = array.into_raw_vec();
+//
+//     RgbImage::from_raw(w , h, raw)
+//         .expect("container should have the right size for the image dimensions")
+//
+//
+// }
+// pub(crate)fn array_grayf32_to_image(array:ArrayD<f32>,shape:&[usize])->ImageBuffer<Luma<u8>,Vec<u8>>{
+//     let vec: Vec<f32>=array.into_raw_vec();
+//     let vec_u8:Vec<u8>=f32_to_u8(&vec);
+//     let (w, h) = (shape[1] as u32, shape[0] as u32);
+//     ImageBuffer::from_fn(w, h, move |x, y| Luma([vec_u8[(y * w + x) as usize]]))
+// }
+// pub(crate)fn array_rgbf32_to_image(array: ArrayD<f32>,shape:&[usize]) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+//
+//     let (w, h) = (shape[1] as u32, shape[0] as u32);
+//     let raw = array.into_raw_vec();
+//     let raw = f32_to_u8(&raw);
+//
+//     RgbImage::from_raw(w , h, raw)
+//         .expect("container should have the right size for the image dimensions")
+//
+//
+// }
 
 
 

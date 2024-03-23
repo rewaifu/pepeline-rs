@@ -3,8 +3,8 @@ use std::path::Path;
 use image::{ImageBuffer, Luma, RgbImage};
 use ndarray::ArrayD;
 use numpy::{PyReadonlyArrayDyn, ToPyArray};
-use pyo3::{ pyfunction, PyObject, PyResult, ToPyObject};
-use crate::utils::image::convert::{array_gray2image, array_grayf32_to_image, array_rgb2image, array_rgbf32_to_image, f32_to_u8, gray_img_open, gray_img_openf32, rgb_img_open, rgb_img_openf32, u8_to_f32};
+use pyo3::{ pyfunction, PyObject, PyResult};
+use crate::utils::image::convert::{f32_to_u8, gray_img_open, gray_img_openf32, rgb_img_open, rgb_img_openf32};
 use crate::utils::image::decode::{jpg_gray_img_open, jpg_gray_img_openf32, jpg_rgb_img_open, jpg_rgb_img_openf32, psd_din32_decode, psd_din_decode, psd_gray32_decode, psd_gray_decode, psd_rgb32_decode, psd_rgb_decode};
 fn save_img_vec(vec_img:&[u8],shape: &[usize],out_path:&Path){
     match shape.len() {
@@ -36,8 +36,8 @@ pub fn save(
 )
 {
 
-    let mut vec_img:Vec<u8>;
-    let mut shape:Vec<usize>;
+    let vec_img:Vec<u8>;
+    let shape:Vec<usize>;
     if let Ok(typee) = input.extract::<PyReadonlyArrayDyn<u8>>(py) {
         let array8 = typee.as_array().to_owned();
         vec_img = array8.clone().into_raw_vec();
@@ -93,16 +93,20 @@ fn all_read_f32(path: &Path, mode: u8, extension: &str) -> ArrayD<f32> {
 }
 
 #[pyfunction]
-pub fn read<'py>(path: String, mode: Option<u8>, f32: Option<bool>, py: Python) -> PyResult<PyObject> {
+pub fn read(
+    path: String,
+    mode: Option<u8>,
+    format: Option<u8>,
+    py: Python) -> PyResult<PyObject> {
     let path = Path::new(&path);
     let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("error");
     let mode = mode.unwrap_or(2u8);
-    let f32 = f32.unwrap_or(false);
-    if f32 {
+    let format = format.unwrap_or(1u8);
+
+    match format {0=>{
         let array = all_read_f32(path, mode, extension);
         Ok(array.to_pyarray(py).into())
-    } else {
+    } _=> {
         let array = all_read_u8(path, mode, extension);
-        Ok(array.to_pyarray(py).into())
-    }
+        Ok(array.to_pyarray(py).into())}}
 }
