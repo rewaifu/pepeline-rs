@@ -1,14 +1,15 @@
 use std::fs::read;
 use std::path::Path;
 
+use ndarray::{Array2, Array3, ArrayD};
+use zune_jpeg::JpegDecoder;
+use zune_jpeg::zune_core::colorspace::ColorSpace;
+use zune_jpeg::zune_core::options::DecoderOptions;
+use zune_psd::PSDDecoder;
+
 use crate::utils::core::convert::{
     luma2array, luma2arrayf32, rgb2array, rgb2arrayf32, rgb8_to_gray32, rgb8_to_gray8, u8_to_f32,
 };
-use ndarray::{Array2, Array3, ArrayD};
-use zune_jpeg::zune_core::colorspace::ColorSpace;
-use zune_jpeg::zune_core::options::DecoderOptions;
-use zune_jpeg::JpegDecoder;
-use zune_psd::PSDDecoder;
 
 pub(crate) fn gray_img_open(path: &Path) -> Array2<u8> {
     let img = image::open(path).unwrap().into_luma8();
@@ -41,7 +42,7 @@ pub(crate) fn jpg_gray_img_open(path: &Path) -> Array2<u8> {
         (image_info.height as usize, image_info.width as usize),
         pixels,
     )
-    .unwrap()
+        .unwrap()
 }
 
 pub(crate) fn jpg_rgb_img_open(path: &Path) -> Array3<u8> {
@@ -55,7 +56,7 @@ pub(crate) fn jpg_rgb_img_open(path: &Path) -> Array3<u8> {
         (image_info.height as usize, image_info.width as usize, 3),
         pixels,
     )
-    .unwrap()
+        .unwrap()
 }
 
 pub(crate) fn jpg_gray_img_openf32(path: &Path) -> Array2<f32> {
@@ -70,7 +71,7 @@ pub(crate) fn jpg_gray_img_openf32(path: &Path) -> Array2<f32> {
         (image_info.height as usize, image_info.width as usize),
         pixels,
     )
-    .unwrap()
+        .unwrap()
 }
 
 pub(crate) fn jpg_rgb_img_openf32(path: &Path) -> Array3<f32> {
@@ -85,7 +86,7 @@ pub(crate) fn jpg_rgb_img_openf32(path: &Path) -> Array3<f32> {
         (image_info.height as usize, image_info.width as usize, 3),
         pixels,
     )
-    .unwrap()
+        .unwrap()
 }
 
 fn decode_size_psd(bytes: &[u8]) -> (u32, u32) {
@@ -126,13 +127,8 @@ pub(crate) fn psd_gray_decode(path: &Path) -> Array2<u8> {
     if color_mode == 1 {
         Array2::from_shape_vec((height as usize, width as usize), px).unwrap()
     } else {
-        let mut gray_values = Vec::with_capacity(px.len() / 3);
-        for chunk in px.chunks(3) {
-            let rgb = (chunk[0], chunk[1], chunk[2]);
-            let gray = rgb8_to_gray8(rgb);
-            gray_values.push(gray);
-        }
-        Array2::from_shape_vec((height as usize, width as usize), gray_values).unwrap()
+        let gray = rgb8_to_gray8(&px);
+        Array2::from_shape_vec((height as usize, width as usize), gray).unwrap()
     }
 }
 
@@ -166,13 +162,8 @@ pub(crate) fn psd_gray32_decode(path: &Path) -> Array2<f32> {
         let px = u8_to_f32(&px);
         Array2::from_shape_vec((height as usize, width as usize), px).unwrap()
     } else {
-        let mut gray_values = Vec::with_capacity(px.len() / 3);
-        for chunk in px.chunks(3) {
-            let rgb = (chunk[0], chunk[1], chunk[2]);
-            let gray = rgb8_to_gray32(rgb);
-            gray_values.push(gray);
-        }
-        Array2::from_shape_vec((height as usize, width as usize), gray_values).unwrap()
+        let gray = rgb8_to_gray32(&px);
+        Array2::from_shape_vec((height as usize, width as usize), gray).unwrap()
     }
 }
 
