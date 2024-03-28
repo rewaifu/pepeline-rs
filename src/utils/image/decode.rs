@@ -1,10 +1,11 @@
+use std::error::Error;
 use std::fs::read;
 use std::path::Path;
 
 use ndarray::{Array2, Array3, ArrayD};
-use zune_jpeg::JpegDecoder;
 use zune_jpeg::zune_core::colorspace::ColorSpace;
 use zune_jpeg::zune_core::options::DecoderOptions;
+use zune_jpeg::JpegDecoder;
 use zune_psd::PSDDecoder;
 
 use crate::utils::core::convert::{
@@ -42,7 +43,7 @@ pub(crate) fn jpg_gray_img_open(path: &Path) -> Array2<u8> {
         (image_info.height as usize, image_info.width as usize),
         pixels,
     )
-        .unwrap()
+    .unwrap()
 }
 
 pub(crate) fn jpg_rgb_img_open(path: &Path) -> Array3<u8> {
@@ -56,7 +57,7 @@ pub(crate) fn jpg_rgb_img_open(path: &Path) -> Array3<u8> {
         (image_info.height as usize, image_info.width as usize, 3),
         pixels,
     )
-        .unwrap()
+    .unwrap()
 }
 
 pub(crate) fn jpg_gray_img_openf32(path: &Path) -> Array2<f32> {
@@ -71,7 +72,7 @@ pub(crate) fn jpg_gray_img_openf32(path: &Path) -> Array2<f32> {
         (image_info.height as usize, image_info.width as usize),
         pixels,
     )
-        .unwrap()
+    .unwrap()
 }
 
 pub(crate) fn jpg_rgb_img_openf32(path: &Path) -> Array3<f32> {
@@ -86,7 +87,7 @@ pub(crate) fn jpg_rgb_img_openf32(path: &Path) -> Array3<f32> {
         (image_info.height as usize, image_info.width as usize, 3),
         pixels,
     )
-        .unwrap()
+    .unwrap()
 }
 
 fn decode_size_psd(bytes: &[u8]) -> (u32, u32) {
@@ -225,40 +226,40 @@ pub(crate) fn psd_din32_decode(path: &Path) -> ArrayD<f32> {
     }
 }
 
-pub fn all_read_u8(path: &Path, mode: u8, extension: &str) -> ArrayD<u8> {
+pub fn all_read_u8(path: &Path, mode: u8, extension: &str) -> Result<ArrayD<u8>, Box<dyn Error>> {
     match extension {
         "jpg" | "jpeg" => match mode {
-            0 => jpg_gray_img_open(path).into_dyn(),
-            _ => jpg_rgb_img_open(path).into_dyn(),
+            0 => Ok(jpg_gray_img_open(path).into_dyn()),
+            _ => Ok(jpg_rgb_img_open(path).into_dyn()),
         },
         "psd" | "PSD" => match mode {
-            0 => psd_gray_decode(path).into_dyn(),
-            1 => psd_rgb_decode(path).into_dyn(),
-            _ => psd_din_decode(path).into_dyn(),
+            0 => Ok(psd_gray_decode(path).into_dyn()),
+            1 => Ok(psd_rgb_decode(path).into_dyn()),
+            _ => Ok(psd_din_decode(path).into_dyn()),
         },
-        "error" => panic!("no_file"),
+        "error" => Err("no_file".into()),
         _ => match mode {
-            0 => gray_img_open(path).into_dyn(),
-            _ => rgb_img_open(path).into_dyn(),
+            0 => Ok(gray_img_open(path).into_dyn()),
+            _ => Ok(rgb_img_open(path).into_dyn()),
         },
     }
 }
 
-pub fn all_read_f32(path: &Path, mode: u8, extension: &str) -> ArrayD<f32> {
+pub fn all_read_f32(path: &Path, mode: u8, extension: &str) -> Result<ArrayD<f32>, Box<dyn Error>> {
     match extension {
         "jpg" | "jpeg" => match mode {
-            0 => jpg_gray_img_openf32(path).into_dyn(),
-            _ => jpg_rgb_img_openf32(path).into_dyn(),
+            0 => Ok(jpg_gray_img_openf32(path).into_dyn()),
+            _ => Ok(jpg_rgb_img_openf32(path).into_dyn()),
         },
         "psd" | "PSD" => match mode {
-            0 => psd_gray32_decode(path).into_dyn(),
-            1 => psd_rgb32_decode(path).into_dyn(),
-            _ => psd_din32_decode(path).into_dyn(),
+            0 => Ok(psd_gray32_decode(path).into_dyn()),
+            1 => Ok(psd_rgb32_decode(path).into_dyn()),
+            _ => Ok(psd_din32_decode(path).into_dyn()),
         },
-        "error" => panic!("no_file"),
+        "error" => Err("no_file".into()),
         _ => match mode {
-            0 => gray_img_openf32(path).into_dyn(),
-            _ => rgb_img_openf32(path).into_dyn(),
+            0 => Ok(gray_img_openf32(path).into_dyn()),
+            _ => Ok(rgb_img_openf32(path).into_dyn()),
         },
     }
 }
