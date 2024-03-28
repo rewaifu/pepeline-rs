@@ -21,7 +21,6 @@ fn dot_inv(dot_size: usize) -> Array2<f32> {
         }
     }
 
-    // Сортируем вектор по значению (в порядке убывания)
     coordinates_and_values
         .sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap_or(std::cmp::Ordering::Equal));
 
