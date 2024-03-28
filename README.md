@@ -23,8 +23,9 @@ save(img, "out.png")
 - resize❓
 - documentation ♻️
 - refactoring ♻️
-- add tests♻️
-- add benchmarks scripts♻️
+- add tests ♻️
+- add benchmarks scripts ♻️
+- simd ❓
 # Function:
 - read - read img (supports psd)
 - screentone - add screenton patern.
