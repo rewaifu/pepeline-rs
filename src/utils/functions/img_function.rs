@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use numpy::{PyReadonlyArrayDyn, ToPyArray};
-use pyo3::{PyErr, pyfunction, PyObject, PyResult, Python};
 use pyo3::exceptions::{PyOSError, PyTypeError};
+use pyo3::{pyfunction, PyErr, PyObject, PyResult, Python};
 
 use crate::utils::core::convert::f32_to_u8;
 use crate::utils::image::decode::{all_read_f32, all_read_u8};
