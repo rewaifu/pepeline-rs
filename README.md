@@ -6,8 +6,8 @@
 # pipeline-rs
 Fast rust-python librarian for internal needs of an organization
 ```py
-from pepeline import screentone, fast_color_level,read,save
-img = (<"img path">,0,0)
+from pepeline import screentone, fast_color_level, read, save
+img = read(<"img path">, 0, 0)
 img = fast_color_level(
     img,     
     in_low = 10,
