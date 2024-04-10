@@ -4,9 +4,9 @@ use std::path::Path;
 
 use filebuffer::FileBuffer;
 use ndarray::{Array2, Array3, ArrayD};
-use zune_jpeg::JpegDecoder;
 use zune_jpeg::zune_core::colorspace::ColorSpace;
 use zune_jpeg::zune_core::options::DecoderOptions;
+use zune_jpeg::JpegDecoder;
 use zune_psd::PSDDecoder;
 
 use crate::utils::core::convert::{

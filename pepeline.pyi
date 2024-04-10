@@ -36,6 +36,19 @@ def fast_color_level(
 \n gamma:float32"""
 
 
+def perlin_noise(
+        size: list,
+        octaves: int,
+        frequency: float,
+        lacunarity: float,
+        seed: int | None,
+) -> np.ndarray: """ size:list 2d or 3d
+\n octaves: uint 
+\n frequency:float32
+\n lacunarity:float32
+\n seed: uint"""
+
+
 def save(
         array: np.ndarray,
         path: str
