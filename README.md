@@ -3,7 +3,7 @@
 [git](https://github.com/scanlate-wiki/pipeline-rs)
 
 
-# pipeline-rs
+# pepeline-rs
 Fast rust-python librarian for internal needs of an organization
 ```py
 from pepeline import screentone, fast_color_level, read, save
