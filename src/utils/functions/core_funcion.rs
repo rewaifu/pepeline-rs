@@ -1,11 +1,21 @@
 use ndarray::{Array2, Array3};
-use noise::Perlin;
+use noise::{NoiseFn, OpenSimplex, Perlin, PerlinSurflet, Simplex, SuperSimplex};
 use numpy::{PyArrayDyn, PyReadonlyArrayDyn, ToPyArray};
-use pyo3::{Py, pyfunction, PyResult, Python};
+use pyo3::{Py, pyclass, pyfunction, PyResult, Python};
 use rand::Rng;
 
 use crate::utils::core::color_levels::levels;
-use crate::utils::core::noise::{perlin_noise_2d, perlin_noise_3d};
+use crate::utils::core::noise::{noise_2d, noise_3d};
+
+#[pyclass]
+#[derive(Clone)]
+pub enum TypeNoise {
+    PERLIN = 0,
+    SIMPLEX = 1,
+    OPENSIMPLEX = 2,
+    SUPERSIMPLEX = 3,
+    PERLINSURFLET = 4,
+}
 
 #[pyfunction]
 pub fn fast_color_level<'py>(
@@ -28,9 +38,36 @@ pub fn fast_color_level<'py>(
     Ok(array.to_pyarray(py).to_owned())
 }
 
+fn generate_noise2d(
+    type_noise: TypeNoise,
+    seed: u32,
+) -> Box<dyn NoiseFn<f64, 2>> {
+    match type_noise {
+        TypeNoise::PERLIN => Box::new(Perlin::new(seed)),
+        TypeNoise::SIMPLEX => Box::new(Simplex::new(seed)),
+        TypeNoise::OPENSIMPLEX => Box::new(OpenSimplex::new(seed)),
+        TypeNoise::SUPERSIMPLEX => Box::new(SuperSimplex::new(seed)),
+        TypeNoise::PERLINSURFLET => Box::new(PerlinSurflet::new(seed))
+    }
+}
+
+fn generate_noise3d(
+    type_noise: TypeNoise,
+    seed: u32,
+) -> Box<dyn NoiseFn<f64, 3>> {
+    match type_noise {
+        TypeNoise::PERLIN => Box::new(Perlin::new(seed)),
+        TypeNoise::SIMPLEX => Box::new(Simplex::new(seed)),
+        TypeNoise::OPENSIMPLEX => Box::new(OpenSimplex::new(seed)),
+        TypeNoise::SUPERSIMPLEX => Box::new(SuperSimplex::new(seed)),
+        TypeNoise::PERLINSURFLET => Box::new(PerlinSurflet::new(seed))
+    }
+}
+
 #[pyfunction]
-pub fn perlin_noise<'py>(
+pub fn noise_generate<'py>(
     size: Vec<usize>,
+    type_noise: TypeNoise,
     octaves: u8,
     frequency: f64,
     lacunarity: f64,
@@ -44,17 +81,17 @@ pub fn perlin_noise<'py>(
     match size.len() {
         2 => {
             let mut array: Array2<f32> = Array2::zeros((size[0], size[1]));
-            let p = Perlin::new(seed);
+            let type_fn = generate_noise2d(type_noise, seed);
             for ((x, y), value) in array.indexed_iter_mut() {
-                *value = perlin_noise_2d(&p, x, y, octaves, frequency, lacunarity);
+                *value = noise_2d(&type_fn, x, y, octaves, frequency, lacunarity);
             }
             Ok(array.into_dyn().to_pyarray(py).to_owned())
         }
         3 => {
             let mut array: Array3<f32> = Array3::zeros((size[0], size[1], size[2]));
-            let p = Perlin::new(seed);
+            let type_fn = generate_noise3d(type_noise, seed);
             for ((x, y, z), value) in array.indexed_iter_mut() {
-                *value = perlin_noise_3d(&p, x, y, z, octaves, frequency, lacunarity);
+                *value = noise_3d(&type_fn, x, y, z, octaves, frequency, lacunarity);
             }
             Ok(array.into_dyn().to_pyarray(py).to_owned())
         }
@@ -63,3 +100,5 @@ pub fn perlin_noise<'py>(
         )),
     }
 }
+
+

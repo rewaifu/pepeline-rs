@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from enum import Enum
+
 import numpy as np
 
 
@@ -24,6 +26,14 @@ def screentone(
                   \n     lx_plus and ly_plus -> uint offset of the pattern by the number of pixels specified by these parameters. None=dot_size/2"""
 
 
+class TypeNoise(Enum):
+    PERLIN = 0,
+    SIMPLEX = 1,
+    OPENSIMPLEX = 2,
+    SUPERSIMPLEX = 3,
+    PERLINSURFLET = 4
+
+
 def fast_color_level(
         array: np.ndarray,
         in_low: None | int,
@@ -36,13 +46,15 @@ def fast_color_level(
 \n gamma:float32"""
 
 
-def perlin_noise(
-        size: list,
+def noise_generate(
+        size: tuple[int, int] | tuple[int, int, int],
+        type_noise: TypeNoise,
         octaves: int,
         frequency: float,
         lacunarity: float,
         seed: int | None,
-) -> np.ndarray: """ size:list 2d or 3d
+) -> np.ndarray: """ size:tuple 2d or 3d
+\n type_noise: TypeNoise
 \n octaves: uint 
 \n frequency:float32
 \n lacunarity:float32
