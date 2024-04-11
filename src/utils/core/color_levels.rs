@@ -24,7 +24,7 @@ pub fn levels(
     } else if gamma != 1.0 {
         array.mapv(|x| ((x - in_low) / (in_range)).max(0.0).min(1.0).powf(gamma))
     } else if gamma == 1.0 && out_range != 1.0 {
-        array.mapv(|x| ((x - in_low) / (in_range)).max(0.0).min(1.0))
+        array.mapv(|x| ((x - in_low) / (in_range) * (out_range) + out_low).max(0.0).min(1.0))
     } else {
         array.mapv(|x| ((x - in_low) / (in_range)).max(0.0).min(1.0))
     }
