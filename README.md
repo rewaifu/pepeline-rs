@@ -30,5 +30,5 @@ save(img, "out.png")
 - read - read img (supports psd)
 - screentone - add screenton patern.
 - fast_color_level - color levels correction
-- perlin_noise - ganerate perlin_noise
+- noise_generate - ganerate noise array
 - save - fast save image
