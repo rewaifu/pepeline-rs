@@ -4,9 +4,9 @@ use std::path::Path;
 
 use filebuffer::FileBuffer;
 use ndarray::{Array2, Array3, ArrayD};
+use zune_jpeg::JpegDecoder;
 use zune_jpeg::zune_core::colorspace::ColorSpace;
 use zune_jpeg::zune_core::options::DecoderOptions;
-use zune_jpeg::JpegDecoder;
 use zune_psd::PSDDecoder;
 
 use crate::utils::core::convert::{
@@ -250,7 +250,6 @@ pub(crate) fn psd_din32_decode(img: &[u8]) -> Result<ArrayD<f32>, Box<dyn Error>
 pub fn all_read_u8(path: &Path, mode: u8) -> Result<ArrayD<u8>, Box<dyn Error>> {
     let img = FileBuffer::open(path).map_err(|err| Box::new(err) as Box<dyn Error>)?;
     let img_magic_byte = &img[..4];
-    println!("{:?}", img_magic_byte);
     match img_magic_byte {
         [255, 216, 255, 224] | [255, 216, 255, 225] => match &img[6..8] {
             [74, 70] | [69, 120] => match mode {
