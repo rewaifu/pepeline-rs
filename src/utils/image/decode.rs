@@ -250,7 +250,6 @@ pub(crate) fn psd_din32_decode(img: &[u8]) -> Result<ArrayD<f32>, Box<dyn Error>
 pub fn all_read_u8(path: &Path, mode: u8) -> Result<ArrayD<u8>, Box<dyn Error>> {
     let img = FileBuffer::open(path).map_err(|err| Box::new(err) as Box<dyn Error>)?;
     let img_magic_byte = &img[..4];
-    println!("{:?}", img_magic_byte);
     match img_magic_byte {
         [255, 216, 255, 224] | [255, 216, 255, 225] => match &img[6..8] {
             [74, 70] | [69, 120] => match mode {
