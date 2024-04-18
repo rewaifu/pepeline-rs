@@ -7,6 +7,7 @@ pub(crate) mod core {
     pub mod color_levels;
     pub mod convert;
     pub mod noise;
+    pub mod tiles;
 }
 
 pub(crate) mod screentone {
