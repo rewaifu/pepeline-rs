@@ -40,7 +40,7 @@ def fast_color_level(
         in_high: None | int,
         out_low: None | int,
         out_high: None | int,
-        gamma: None | int,
+        gamma: None | float,
 ) -> np.ndarray: """ array:np.float32 
 \n in_low...out_high:uint8 
 \n gamma:float32"""
