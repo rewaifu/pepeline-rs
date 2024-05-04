@@ -10,7 +10,8 @@ use zune_jpeg::zune_core::options::DecoderOptions;
 use zune_psd::PSDDecoder;
 
 use crate::utils::core::convert::{
-    luma2array, luma2arrayf32, rgb2array, rgb2arrayf32, rgb8_to_gray32, rgb8_to_gray8, u8_to_f32,
+    luma2array, luma2arrayf32, rgb2array, rgb2arrayf32, rgb8_to_gray32, rgb8_to_gray8, u16_to_f32,
+    u16_to_u8, u8_to_f32,
 };
 
 pub(crate) fn gray_img_open(bytes: &[u8]) -> Result<Array2<u8>, Box<dyn Error>> {
@@ -133,7 +134,10 @@ pub(crate) fn psd_gray_decode(img: &[u8]) -> Result<Array2<u8>, Box<dyn Error>> 
     let size_bites: &[u8] = &img[14..22];
     let color_mode = img[25];
     let mut decoder = PSDDecoder::new(img);
-    let px = decoder.decode_raw().unwrap();
+    let mut px = decoder.decode_raw().unwrap();
+    if &img[23] == &16 {
+        px = u16_to_u8(&px);
+    }
     let (height, width) = decode_size_psd(size_bites);
     if color_mode == 1 {
         Ok(Array2::from_shape_vec(
@@ -153,7 +157,10 @@ pub(crate) fn psd_rgb_decode(img: &[u8]) -> Result<Array3<u8>, Box<dyn Error>> {
     let size_bites: &[u8] = &img[14..22];
     let color_mode = img[25];
     let mut decoder = PSDDecoder::new(img);
-    let px = decoder.decode_raw().unwrap();
+    let mut px = decoder.decode_raw().unwrap();
+    if &img[23] == &16 {
+        px = u16_to_u8(&px);
+    }
     let (height, width) = decode_size_psd(size_bites);
     if color_mode == 1 {
         let mut rgb_values = Vec::with_capacity(px.len() * 3);
@@ -177,7 +184,10 @@ pub(crate) fn psd_gray32_decode(img: &[u8]) -> Result<Array2<f32>, Box<dyn Error
     let size_bites: &[u8] = &img[14..22];
     let color_mode = img[25];
     let mut decoder = PSDDecoder::new(img);
-    let px = decoder.decode_raw().unwrap();
+    let mut px = decoder.decode_raw().unwrap();
+    if &img[23] == &16 {
+        px = u16_to_u8(&px);
+    }
     let (height, width) = decode_size_psd(size_bites);
     if color_mode == 1 {
         let px = u8_to_f32(&px);
@@ -198,8 +208,11 @@ pub(crate) fn psd_rgb32_decode(img: &[u8]) -> Result<Array3<f32>, Box<dyn Error>
     let size_bites: &[u8] = &img[14..22];
     let color_mode = img[25];
     let mut decoder = PSDDecoder::new(img);
-    let px = decoder.decode_raw().unwrap();
+    let mut px = decoder.decode_raw().unwrap();
     let (height, width) = decode_size_psd(size_bites);
+    if &img[23] == &16 {
+        px = u16_to_u8(&px);
+    }
     if color_mode == 1 {
         let mut rgb_values: Vec<f32> = Vec::with_capacity(px.len() * 3);
 
@@ -224,8 +237,11 @@ pub(crate) fn psd_din_decode(img: &[u8]) -> Result<ArrayD<u8>, Box<dyn Error>> {
     let size_bites: &[u8] = &img[14..22];
     let channels = img[13] as usize;
     let mut decoder = PSDDecoder::new(img);
-    let px = decoder.decode_raw().unwrap();
+    let mut px = decoder.decode_raw().unwrap();
     let (height, width) = decode_size_psd(size_bites);
+    if &img[23] == &16 {
+        px = u16_to_u8(&px);
+    }
     if channels == 1 {
         Ok(Array2::from_shape_vec((height as usize, width as usize), px)?.into_dyn())
     } else {
@@ -239,11 +255,18 @@ pub(crate) fn psd_din32_decode(img: &[u8]) -> Result<ArrayD<f32>, Box<dyn Error>
     let mut decoder = PSDDecoder::new(img);
     let px = decoder.decode_raw().unwrap();
     let (height, width) = decode_size_psd(size_bites);
-    let px = u8_to_f32(&px);
+    let px_float = match &img[23] {
+        16 => { u16_to_f32(&px) }
+        8 => { u8_to_f32(&px) }
+        _ => { return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, format!("Unsupported bits: {}", &img[23])))); }
+    };
     if channels == 1 {
-        Ok(Array2::from_shape_vec((height as usize, width as usize), px)?.into_dyn())
+        Ok(Array2::from_shape_vec((height as usize, width as usize), px_float)?.into_dyn())
     } else {
-        Ok(Array3::from_shape_vec((height as usize, width as usize, channels), px)?.into_dyn())
+        Ok(
+            Array3::from_shape_vec((height as usize, width as usize, channels), px_float)?
+                .into_dyn(),
+        )
     }
 }
 

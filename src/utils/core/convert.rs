@@ -1,3 +1,5 @@
+use std::cmp::min;
+
 use image::{GrayImage, RgbImage};
 use ndarray::{Array2, Array3};
 
@@ -32,6 +34,22 @@ pub(crate) fn u8_to_f32(bytes: &[u8]) -> Vec<f32> {
     });
 
     floats
+}
+
+pub(crate) fn u16_to_f32(bytes: &[u8]) -> Vec<f32> {
+    let mut img_float: Vec<f32> = Vec::with_capacity(bytes.len() / 2);
+    for chunk in bytes.chunks(2) {
+        img_float.push(min(255, (chunk[0] as u16 + chunk[1] as u16 * 255) / 255) as f32 / 255.0)
+    }
+    img_float
+}
+
+pub(crate) fn u16_to_u8(bytes: &[u8]) -> Vec<u8> {
+    let mut img_uint: Vec<u8> = Vec::with_capacity(bytes.len() / 2);
+    for chunk in bytes.chunks(2) {
+        img_uint.push(min(255, (chunk[0] as u16 + chunk[1] as u16 * 255) / 255) as u8)
+    }
+    img_uint
 }
 
 pub(crate) fn f32_to_u8(bytes: &[f32]) -> Vec<u8> {
