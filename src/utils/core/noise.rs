@@ -10,8 +10,8 @@ pub fn noise_2d<T>(
     frequency: f64,
     lacunarity: f64,
 ) -> f32
-    where
-        T: NoiseFn<f64, 2>,
+where
+    T: NoiseFn<f64, 2>,
 {
     let mut total = 0.0;
     let mut frequency = frequency;
@@ -39,8 +39,8 @@ pub fn noise_3d<T>(
     frequency: f64,
     lacunarity: f64,
 ) -> f32
-    where
-        T: NoiseFn<f64, 3>,
+where
+    T: NoiseFn<f64, 3>,
 {
     let mut total = 0.0;
     let mut frequency = frequency;

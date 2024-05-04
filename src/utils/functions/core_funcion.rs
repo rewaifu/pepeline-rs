@@ -1,3 +1,5 @@
+use std::cmp::{max, min};
+
 use ndarray::{Array2, Array3};
 use noise::{NoiseFn, OpenSimplex, Perlin, PerlinSurflet, Simplex, SuperSimplex};
 use numpy::{PyArrayDyn, PyReadonlyArrayDyn, ToPyArray};
@@ -38,29 +40,23 @@ pub fn fast_color_level<'py>(
     Ok(array.to_pyarray(py).to_owned())
 }
 
-fn generate_noise2d(
-    type_noise: TypeNoise,
-    seed: u32,
-) -> Box<dyn NoiseFn<f64, 2>> {
+fn generate_noise2d(type_noise: TypeNoise, seed: u32) -> Box<dyn NoiseFn<f64, 2>> {
     match type_noise {
         TypeNoise::PERLIN => Box::new(Perlin::new(seed)),
         TypeNoise::SIMPLEX => Box::new(Simplex::new(seed)),
         TypeNoise::OPENSIMPLEX => Box::new(OpenSimplex::new(seed)),
         TypeNoise::SUPERSIMPLEX => Box::new(SuperSimplex::new(seed)),
-        TypeNoise::PERLINSURFLET => Box::new(PerlinSurflet::new(seed))
+        TypeNoise::PERLINSURFLET => Box::new(PerlinSurflet::new(seed)),
     }
 }
 
-fn generate_noise3d(
-    type_noise: TypeNoise,
-    seed: u32,
-) -> Box<dyn NoiseFn<f64, 3>> {
+fn generate_noise3d(type_noise: TypeNoise, seed: u32) -> Box<dyn NoiseFn<f64, 3>> {
     match type_noise {
         TypeNoise::PERLIN => Box::new(Perlin::new(seed)),
         TypeNoise::SIMPLEX => Box::new(Simplex::new(seed)),
         TypeNoise::OPENSIMPLEX => Box::new(OpenSimplex::new(seed)),
         TypeNoise::SUPERSIMPLEX => Box::new(SuperSimplex::new(seed)),
-        TypeNoise::PERLINSURFLET => Box::new(PerlinSurflet::new(seed))
+        TypeNoise::PERLINSURFLET => Box::new(PerlinSurflet::new(seed)),
     }
 }
 
@@ -74,10 +70,7 @@ pub fn noise_generate<'py>(
     seed: Option<u32>,
     py: Python,
 ) -> PyResult<Py<PyArrayDyn<f32>>> {
-    let seed = match seed {
-        Some(s) => s,
-        None => rand::thread_rng().gen_range(1..=10000) as u32,
-    };
+    let seed = seed.unwrap_or(rand::thread_rng().gen_range(1..=10000) as u32);
     match size.len() {
         2 => {
             let mut array: Array2<f32> = Array2::zeros((size[0], size[1]));
@@ -101,4 +94,54 @@ pub fn noise_generate<'py>(
     }
 }
 
+fn crop_cord_2d(img: &ndarray::ArrayD<f32>) -> (usize, usize, usize, usize) {
+    let shap = img.shape();
+    let mut x_min = shap[0];
+    let mut x_max = 0;
+    let mut y_min = shap[1];
+    let mut y_max = 0;
+    for x in 0..shap[0] {
+        for y in 0..shap[1] {
+            if img[[x, y]] != 0.0 {
+                x_min = min(x_min, x);
+                x_max = max(x_max, x);
+                y_min = min(y_min, y);
+                y_max = max(y_max, y);
+            }
+        }
+    }
+    return (x_min, x_max, y_min, y_max);
+}
 
+fn crop_cord_3d(img: &ndarray::ArrayD<f32>) -> (usize, usize, usize, usize) {
+    let shap = img.shape();
+    let mut x_min = shap[0];
+    let mut x_max = 0;
+    let mut y_min = shap[1];
+    let mut y_max = 0;
+    for x in 0..shap[0] {
+        for y in 0..shap[1] {
+            for c in 0..shap[2] {
+                if img[[x, y, c]] != 0.0 {
+                    x_min = min(x_min, x);
+                    x_max = max(x_max, x);
+                    y_min = min(y_min, y);
+                    y_max = max(y_max, y);
+                }
+            }
+        }
+    }
+    return (x_min, x_max, y_min, y_max);
+}
+
+#[pyfunction]
+pub fn crop_cord(input: PyReadonlyArrayDyn<f32>) -> PyResult<(usize, usize, usize, usize)> {
+    let array = input.as_array().to_owned();
+    match array.shape().len() {
+        2 => Ok(crop_cord_2d(&array)),
+        3 => Ok(crop_cord_3d(&array)),
+        _ => Err(pyo3::exceptions::PyValueError::new_err(
+            "Unsupported dimensions",
+        )),
+    }
+}

@@ -34,6 +34,10 @@ class TypeNoise(Enum):
     PERLINSURFLET = 4
 
 
+def crop_cord(array: np.ndarray) -> (
+int, int, int, int): "returns image coordinates not equal to 0, made for cropping using the Laplace operator"
+
+
 def fast_color_level(
         array: np.ndarray,
         in_low: None | int,
