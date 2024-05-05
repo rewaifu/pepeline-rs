@@ -4,9 +4,9 @@ use std::path::Path;
 
 use filebuffer::FileBuffer;
 use ndarray::{Array2, Array3, ArrayD};
-use zune_jpeg::JpegDecoder;
 use zune_jpeg::zune_core::colorspace::ColorSpace;
 use zune_jpeg::zune_core::options::DecoderOptions;
+use zune_jpeg::JpegDecoder;
 use zune_psd::PSDDecoder;
 
 use crate::utils::core::convert::{
@@ -256,9 +256,14 @@ pub(crate) fn psd_din32_decode(img: &[u8]) -> Result<ArrayD<f32>, Box<dyn Error>
     let px = decoder.decode_raw().unwrap();
     let (height, width) = decode_size_psd(size_bites);
     let px_float = match &img[23] {
-        16 => { u16_to_f32(&px) }
-        8 => { u8_to_f32(&px) }
-        _ => { return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, format!("Unsupported bits: {}", &img[23])))); }
+        16 => u16_to_f32(&px),
+        8 => u8_to_f32(&px),
+        _ => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("Unsupported bits: {}", &img[23]),
+            )));
+        }
     };
     if channels == 1 {
         Ok(Array2::from_shape_vec((height as usize, width as usize), px_float)?.into_dyn())

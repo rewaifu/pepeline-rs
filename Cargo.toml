@@ -8,6 +8,7 @@ edition = "2021"
 name = "pepeline"
 crate-type = ["cdylib"]
 
+
 [dependencies]
 pyo3 = { version = "0.20.0", features = ["extension-module"] }
 numpy = "0.20.0"
@@ -19,8 +20,8 @@ filebuffer = "0.4.0"
 noise = "0.9.0"
 rand = "0.8.5"
 #fast_image_resize = "3.0.4"
-#webp = "0.2.6"
-#filebuffer = "0.4.0"
+
+num = "0.4.2"
 #ndarray-conv = "0.2.0"
 #ndarray-vision = "0.5.1"
 #rayon = "1.9.0"

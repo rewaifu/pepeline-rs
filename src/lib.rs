@@ -13,6 +13,8 @@ fn pepeline(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(core_funcion::noise_generate, m)?)?;
     m.add_function(wrap_pyfunction!(img_function::save, m)?)?;
     m.add_function(wrap_pyfunction!(core_funcion::crop_cord, m)?)?;
+    m.add_function(wrap_pyfunction!(core_funcion::rgb2cmyk, m)?)?;
+    m.add_function(wrap_pyfunction!(core_funcion::cmyk2rgb, m)?)?;
     m.add_class::<core_funcion::TypeNoise>()?;
     Ok(())
 }

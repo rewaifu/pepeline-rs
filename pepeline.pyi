@@ -18,12 +18,23 @@ def read(
 def screentone(
         array: np.ndarray,
         dot_size: int,
-        ly_plus: None | int,
-        lx_plus: None | int,
+        angle: None | int
 ) -> np.ndarray: """screentone overlay function:
                   \n     input -> array only 2D f32 0-1
                   \n     dot_size -> uint screenton size in pixels
-                  \n     lx_plus and ly_plus -> uint offset of the pattern by the number of pixels specified by these parameters. None=dot_size/2"""
+                  \n     angle -> i16 degree by which we rotate the pattern"""
+
+
+def cmyk2rgb(
+        array: np.ndarray
+) -> np.ndarray: """converts an RGB f32 0-1 array to CMYK in 0-1 form.
+workaround will be replaced by cvt_color in the future"""
+
+
+def rgb2cmyk(
+        array: np.ndarray
+) -> np.ndarray: """converts an CMYK f32 0-1 array to RGB in 0-1 form.
+workaround will be replaced by cvt_color in the future"""
 
 
 class TypeNoise(Enum):
@@ -35,7 +46,7 @@ class TypeNoise(Enum):
 
 
 def crop_cord(array: np.ndarray) -> (
-int, int, int, int): "returns image coordinates not equal to 0, made for cropping using the Laplace operator"
+        int, int, int, int): "returns image coordinates not equal to 0, made for cropping using the Laplace operator"
 
 
 def fast_color_level(

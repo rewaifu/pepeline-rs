@@ -2,8 +2,8 @@ use std::cmp::{max, min};
 
 use ndarray::{Array2, Array3};
 use noise::{NoiseFn, OpenSimplex, Perlin, PerlinSurflet, Simplex, SuperSimplex};
-use numpy::{PyArrayDyn, PyReadonlyArrayDyn, ToPyArray};
-use pyo3::{Py, pyclass, pyfunction, PyResult, Python};
+use numpy::{PyArray3, PyArrayDyn, PyReadonlyArray3, PyReadonlyArrayDyn, ToPyArray};
+use pyo3::{pyclass, pyfunction, Py, PyResult, Python};
 use rand::Rng;
 
 use crate::utils::core::color_levels::levels;
@@ -144,4 +144,78 @@ pub fn crop_cord(input: PyReadonlyArrayDyn<f32>) -> PyResult<(usize, usize, usiz
             "Unsupported dimensions",
         )),
     }
+}
+
+fn rgb_to_cmyk(r: f32, g: f32, b: f32) -> (f32, f32, f32, f32) {
+    if (r, g, b) == (0.0, 0.0, 0.0) {
+        return (0.0, 0.0, 0.0, 1.0);
+    }
+    let c = 1.0 - r;
+    let m = 1.0 - g;
+    let y = 1.0 - b;
+
+    // extract out k [0, 1]
+    let min_cmy = c.min(m).min(y);
+    let c = (c - min_cmy) / (1.0 - min_cmy);
+    let m = (m - min_cmy) / (1.0 - min_cmy);
+    let y = (y - min_cmy) / (1.0 - min_cmy);
+    let k = min_cmy;
+
+    (c, m, y, k)
+}
+
+fn cmyk_to_rgb(c: f32, m: f32, y: f32, k: f32) -> (f32, f32, f32) {
+    let k = 1.0 - k;
+    let r = (1.0 - c) * k;
+    let g = (1.0 - m) * k;
+    let b = (1.0 - y) * k;
+    (r, g, b)
+}
+
+#[pyfunction]
+pub fn rgb2cmyk(input: PyReadonlyArray3<f32>, py: Python) -> PyResult<Py<PyArray3<f32>>> {
+    let array = input.as_array().to_owned();
+    let shape = array.shape();
+    if shape[2] != 3 {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "this is not an RGB array",
+        ));
+    }
+    let mut cmyk_array = Array3::zeros([shape[0], shape[1], 4]);
+    for x in 0..shape[0] {
+        for y in 0..shape[1] {
+            let cmyk = rgb_to_cmyk(array[[x, y, 0]], array[[x, y, 1]], array[[x, y, 2]]);
+            cmyk_array[[x, y, 0]] = cmyk.0;
+            cmyk_array[[x, y, 1]] = cmyk.1;
+            cmyk_array[[x, y, 2]] = cmyk.2;
+            cmyk_array[[x, y, 3]] = cmyk.3;
+        }
+    }
+    Ok(cmyk_array.to_pyarray(py).to_owned())
+}
+
+#[pyfunction]
+pub fn cmyk2rgb(input: PyReadonlyArray3<f32>, py: Python) -> PyResult<Py<PyArray3<f32>>> {
+    let array = input.as_array().to_owned();
+    let shape = array.shape();
+    if shape[2] != 4 {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "this is not an CMYK array",
+        ));
+    }
+    let mut rgb_array = Array3::zeros([shape[0], shape[1], 3]);
+    for x in 0..shape[0] {
+        for y in 0..shape[1] {
+            let rgb = cmyk_to_rgb(
+                array[[x, y, 0]],
+                array[[x, y, 1]],
+                array[[x, y, 2]],
+                array[[x, y, 3]],
+            );
+            rgb_array[[x, y, 0]] = rgb.0;
+            rgb_array[[x, y, 1]] = rgb.1;
+            rgb_array[[x, y, 2]] = rgb.2;
+        }
+    }
+    Ok(rgb_array.to_pyarray(py).to_owned())
 }
