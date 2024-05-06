@@ -1,8 +1,8 @@
 use numpy::{PyArray2, PyReadonlyArray2, ToPyArray};
 use pyo3::{pyfunction, Py, PyResult, Python};
 
-use crate::utils::screentone::dot::TypeDot;
-use crate::utils::screentone::screentone_add::{screentone_add, screentone_rotate_add};
+use crate::utils::core::enums::TypeDot;
+use crate::utils::halftone::screentone_add::{screentone_add, screentone_rotate_add};
 
 #[pyfunction]
 pub fn screentone<'py>(
@@ -12,7 +12,7 @@ pub fn screentone<'py>(
     dot_type: Option<TypeDot>,
     py: Python,
 ) -> PyResult<Py<PyArray2<f32>>> {
-    // screentone overlay function:
+    // halftone overlay function:
     //     input -> array only 2D f32 0-1
     //     dot_size -> uint screenton size in pixels
     //     angle -> i16 degree by which we rotate the pattern

@@ -7,7 +7,7 @@ pub(crate) fn rgb8_to_gray8(rgb: &[u8]) -> Vec<u8> {
     let mut gray_float: Vec<u8> = Vec::with_capacity(rgb.len() / 3);
     for chunk in rgb.chunks(3) {
         gray_float.push(
-            (chunk[0] as f32 * 0.114 + chunk[1] as f32 * 0.587 + chunk[2] as f32 * 0.299) as u8,
+            (chunk[0] as f32 * 0.2126 + chunk[1] as f32 * 0.7152 + chunk[2] as f32 * 0.0722) as u8,
         )
     }
     gray_float
@@ -17,7 +17,8 @@ pub(crate) fn rgb8_to_gray32(rgb: &[u8]) -> Vec<f32> {
     let mut gray_float: Vec<f32> = Vec::with_capacity(rgb.len() / 3);
     for chunk in rgb.chunks(3) {
         gray_float.push(
-            (chunk[0] as f32 * 0.114 + chunk[1] as f32 * 0.587 + chunk[2] as f32 * 0.299) / 255.0,
+            (chunk[0] as f32 * 0.2126 + chunk[1] as f32 * 0.7152 + chunk[2] as f32 * 0.0722)
+                / 255.0,
         )
     }
     gray_float

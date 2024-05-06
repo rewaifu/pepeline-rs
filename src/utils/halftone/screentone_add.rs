@@ -1,29 +1,8 @@
 use ndarray::Array2;
 
-use crate::utils::screentone::dot::{create_dot, TypeDot};
-
-fn rotate_pixel_coordinates(
-    x: f32,
-    y: f32,
-    center_x: f32,
-    center_y: f32,
-    cos_theta: f32,
-    sin_theta: f32,
-) -> (usize, usize) {
-    let x_rel = x - center_x;
-    let y_rel = y - center_y;
-
-    let rotated_x = (cos_theta * x_rel - sin_theta * y_rel + center_x) as usize;
-    let rotated_y = (sin_theta * x_rel + cos_theta * y_rel + center_y) as usize;
-
-    (rotated_x, rotated_y)
-}
-
-fn compute_cos_sin(theta: f32) -> (f32, f32) {
-    let cos_theta = theta.cos();
-    let sin_theta = theta.sin();
-    (cos_theta, sin_theta)
-}
+use crate::utils::core::enums::TypeDot;
+use crate::utils::halftone::dot::create_dot;
+use crate::utils::halftone::utils_halftone::{compute_cos_sin, rotate_pixel_coordinates};
 
 pub fn screentone_rotate_add(
     array: &mut Array2<f32>,

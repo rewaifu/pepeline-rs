@@ -1,5 +1,6 @@
 use ndarray::Array2;
-use pyo3::pyclass;
+
+use crate::utils::core::enums::TypeDot;
 
 const X: f32 = 0.1;
 const Y: f32 = 0.15;
@@ -9,16 +10,6 @@ fn math(dot_size: usize) -> (f32, (f32, f32)) {
     let point = (dot_size as f32 / 2.0 + X, dot_size as f32 / 2.0 + Y);
     let step = (1.0 - 0.5) / ((dot_size as f32).powi(2) - 1.0);
     return (step, point);
-}
-
-#[pyclass]
-#[derive(Clone)]
-pub enum TypeDot {
-    CIRCLE = 0,
-    CROSS = 1,
-    ELLIPSE = 2,
-    LINE = 3,
-    INVLINE = 4,
 }
 
 fn line(x: f32, y: f32, h: f32) -> bool {
