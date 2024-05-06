@@ -1,6 +1,6 @@
 use ndarray::Array2;
 
-use crate::utils::screentone::dot::create_dot;
+use crate::utils::screentone::dot::{create_dot, TypeDot};
 
 fn rotate_pixel_coordinates(
     x: f32,
@@ -25,8 +25,8 @@ fn compute_cos_sin(theta: f32) -> (f32, f32) {
     (cos_theta, sin_theta)
 }
 
-pub fn screentone_rotate_add(array: &mut Array2<f32>, dot_size: usize, angle: f32) {
-    let (dot, dot_inv) = create_dot(dot_size);
+pub fn screentone_rotate_add(array: &mut Array2<f32>, dot_size: usize, angle: f32, dot_type: TypeDot) {
+    let (dot, dot_inv) = create_dot(dot_size, dot_type);
     let mut src_values: f32;
     let mut colum: usize;
     let (w, h) = (array.shape()[0], array.shape()[1]);
@@ -58,8 +58,8 @@ pub fn screentone_rotate_add(array: &mut Array2<f32>, dot_size: usize, angle: f3
     }
 }
 
-pub fn screentone_add(array: &mut Array2<f32>, dot_size: usize, ly_plus: usize, lx_plus: usize) {
-    let (dot, dot_inv) = create_dot(dot_size);
+pub fn screentone_add(array: &mut Array2<f32>, dot_size: usize, ly_plus: usize, lx_plus: usize, dot_type: TypeDot) {
+    let (dot, dot_inv) = create_dot(dot_size, dot_type);
     let mut src_values: f32;
     let mut colum: usize;
     let (w, h) = (array.shape()[0], array.shape()[1]);

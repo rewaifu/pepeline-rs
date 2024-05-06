@@ -2,6 +2,8 @@ use pyo3::prelude::*;
 
 use utils::functions::{core_funcion, img_function, screentone_function};
 
+use crate::utils::screentone::dot::TypeDot;
+
 mod utils;
 
 /// A Python module implemented in Rust.
@@ -16,5 +18,6 @@ fn pepeline(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(core_funcion::rgb2cmyk, m)?)?;
     m.add_function(wrap_pyfunction!(core_funcion::cmyk2rgb, m)?)?;
     m.add_class::<core_funcion::TypeNoise>()?;
+    m.add_class::<TypeDot>()?;
     Ok(())
 }

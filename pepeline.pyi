@@ -18,7 +18,8 @@ def read(
 def screentone(
         array: np.ndarray,
         dot_size: int,
-        angle: None | int
+        angle: None | int,
+        dot_type: None | TypeDot
 ) -> np.ndarray: """screentone overlay function:
                   \n     input -> array only 2D f32 0-1
                   \n     dot_size -> uint screenton size in pixels
@@ -43,6 +44,12 @@ class TypeNoise(Enum):
     OPENSIMPLEX = 2,
     SUPERSIMPLEX = 3,
     PERLINSURFLET = 4
+
+
+class TypeDot(Enum):
+    CIRCLE = 0,
+    CROSS = 1,
+    ELLIPSE = 2,
 
 
 def crop_cord(array: np.ndarray) -> (

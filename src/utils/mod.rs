@@ -10,7 +10,7 @@ pub(crate) mod core {
 }
 
 pub(crate) mod screentone {
-    mod dot;
+    pub mod dot;
     pub mod screentone_add;
 }
 
