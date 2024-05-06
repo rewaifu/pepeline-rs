@@ -1,5 +1,5 @@
 use numpy::{PyArray2, PyReadonlyArray2, ToPyArray};
-use pyo3::{pyfunction, Py, PyResult, Python};
+use pyo3::{Py, pyfunction, PyResult, Python};
 
 use crate::utils::screentone::screentone_add::{screentone_add, screentone_rotate_add};
 
@@ -21,7 +21,6 @@ pub fn screentone<'py>(
     } else {
         let lx_plus = dot_size / 2;
         let ly_plus = dot_size / 2;
-
         screentone_add(&mut array, dot_size, ly_plus, lx_plus);
     }
 

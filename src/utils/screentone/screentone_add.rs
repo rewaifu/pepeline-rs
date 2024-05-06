@@ -1,29 +1,28 @@
-use ndarray::{arr1, arr2, Array1, Array2};
-use num::abs;
+use ndarray::Array2;
 
 use crate::utils::screentone::dot::create_dot;
 
 fn rotate_pixel_coordinates(
     x: f32,
     y: f32,
-    angle: f32,
     center_x: f32,
     center_y: f32,
+    cos_theta: f32,
+    sin_theta: f32,
 ) -> (usize, usize) {
-    let theta = angle;
-
-    let rotation_matrix: Array2<f32> =
-        arr2(&[[theta.cos(), -theta.sin()], [theta.sin(), theta.cos()]]);
-
     let x_rel = x - center_x;
     let y_rel = y - center_y;
 
-    let rotated_point: Array1<f32> = rotation_matrix.dot(&arr1(&[x_rel, y_rel]));
-
-    let rotated_x = abs(rotated_point[0] + center_x) as usize;
-    let rotated_y = abs(rotated_point[1] + center_y) as usize;
+    let rotated_x = (cos_theta * x_rel - sin_theta * y_rel + center_x) as usize;
+    let rotated_y = (sin_theta * x_rel + cos_theta * y_rel + center_y) as usize;
 
     (rotated_x, rotated_y)
+}
+
+fn compute_cos_sin(theta: f32) -> (f32, f32) {
+    let cos_theta = theta.cos();
+    let sin_theta = theta.sin();
+    (cos_theta, sin_theta)
 }
 
 pub fn screentone_rotate_add(array: &mut Array2<f32>, dot_size: usize, angle: f32) {
@@ -33,6 +32,7 @@ pub fn screentone_rotate_add(array: &mut Array2<f32>, dot_size: usize, angle: f3
     let (w, h) = (array.shape()[0], array.shape()[1]);
     let lx_plus = w / 2;
     let ly_plus = h / 2;
+    let cos_sin = compute_cos_sin(angle);
     let ww = 0..w;
     let hh = 0..h;
     for ly in ww {
@@ -42,8 +42,9 @@ pub fn screentone_rotate_add(array: &mut Array2<f32>, dot_size: usize, angle: f3
             let value = &mut array[[ly, lx]];
             if *value > 0.0 && *value < 1.0 {
                 let lx2 = lx + lx_plus;
-                let rot =
-                    rotate_pixel_coordinates(lx2 as f32, ly2 as f32, angle, w as f32, h as f32);
+                let rot = rotate_pixel_coordinates(
+                    lx2 as f32, ly2 as f32, w as f32, h as f32, cos_sin.0, cos_sin.1,
+                );
                 colum = rot.1 / dot_size;
                 src_values = if (colum + rot.0 / dot_size) % 2 == 1 {
                     dot_inv[[rot.0 % dot_size, rot.1 % dot_size]]
