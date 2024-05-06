@@ -25,7 +25,12 @@ fn compute_cos_sin(theta: f32) -> (f32, f32) {
     (cos_theta, sin_theta)
 }
 
-pub fn screentone_rotate_add(array: &mut Array2<f32>, dot_size: usize, angle: f32, dot_type: TypeDot) {
+pub fn screentone_rotate_add(
+    array: &mut Array2<f32>,
+    dot_size: usize,
+    angle: f32,
+    dot_type: TypeDot,
+) {
     let (dot, dot_inv) = create_dot(dot_size, dot_type);
     let mut src_values: f32;
     let mut colum: usize;
@@ -58,7 +63,13 @@ pub fn screentone_rotate_add(array: &mut Array2<f32>, dot_size: usize, angle: f3
     }
 }
 
-pub fn screentone_add(array: &mut Array2<f32>, dot_size: usize, ly_plus: usize, lx_plus: usize, dot_type: TypeDot) {
+pub fn screentone_add(
+    array: &mut Array2<f32>,
+    dot_size: usize,
+    ly_plus: usize,
+    lx_plus: usize,
+    dot_type: TypeDot,
+) {
     let (dot, dot_inv) = create_dot(dot_size, dot_type);
     let mut src_values: f32;
     let mut colum: usize;

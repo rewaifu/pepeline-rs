@@ -1,5 +1,5 @@
 use numpy::{PyArray2, PyReadonlyArray2, ToPyArray};
-use pyo3::{Py, pyfunction, PyResult, Python};
+use pyo3::{pyfunction, Py, PyResult, Python};
 
 use crate::utils::screentone::dot::TypeDot;
 use crate::utils::screentone::screentone_add::{screentone_add, screentone_rotate_add};

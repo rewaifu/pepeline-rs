@@ -50,6 +50,8 @@ class TypeDot(Enum):
     CIRCLE = 0,
     CROSS = 1,
     ELLIPSE = 2,
+    LINE = 2,
+    INVLINE = 3
 
 
 def crop_cord(array: np.ndarray) -> (
