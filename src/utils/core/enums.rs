@@ -28,6 +28,7 @@ pub enum CvtType {
     RGB2BGR = 12,
     BGR2RGB = 13,
     GRAY2RGB = 14,
+    RGB2Luma = 15,
 }
 
 #[pyclass]

@@ -29,6 +29,7 @@ class CvtType(Enum):
     RGB2BGR = 12,
     BGR2RGB = 13,
     GRAY2RGB = 14,
+    RGB2Luma = 15  #CIELAB. L only
 
 
 class TypeDot(Enum):
@@ -82,7 +83,7 @@ def cvt_color(array: np.ndarray, cvt_type: CvtType) -> np.ndarray:
     Convert the color space of an array of type np.ndarray.
 
     Parameters:
-    - array (np.ndarray): The input array, typically representing an image, with dtype np.float32.
+    - array (np.ndarray): The input array, typically representing an image, with dtype np.float32. (YCbCr only 0-1)
     - cvt_type (CvtType): The type of color space conversion to perform.
 
     Returns:
@@ -120,11 +121,11 @@ def noise_generate(
         lacunarity: float,
         seed: int | None,
 ) -> np.ndarray:
-    """ size:tuple 2d or 3d
+    """ size: tuple 2d or 3d
     \n type_noise: TypeNoise
     \n octaves: uint
-    \n frequency:float32
-    \n lacunarity:float32
+    \n frequency: float32
+    \n lacunarity: float32
     \n seed: uint"""
 
 

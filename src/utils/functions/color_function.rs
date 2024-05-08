@@ -1,9 +1,10 @@
 use ndarray::{Array2, Array3};
 use numpy::{PyArrayDyn, PyReadonlyArrayDyn, ToPyArray};
-use pyo3::{pyfunction, Py, PyResult, Python};
+use pyo3::{pyfunction, Py, PyObject, PyResult, Python};
 
+use crate::utils::core::array::utils::py_obj_to_array;
 use crate::utils::core::color_levels::levels;
-use crate::utils::core::cvt_color::cvt_color_float;
+use crate::utils::core::cvt_color_float::cvt_color_float;
 use crate::utils::core::enums::CvtType;
 
 #[pyfunction]
@@ -28,12 +29,8 @@ pub fn fast_color_level<'py>(
 }
 
 #[pyfunction]
-pub fn cvt_color(
-    input: PyReadonlyArrayDyn<f32>,
-    cvt_type: CvtType,
-    py: Python,
-) -> PyResult<Py<PyArrayDyn<f32>>> {
-    let array = input.as_array().to_owned();
+pub fn cvt_color(input: PyObject, cvt_type: CvtType, py: Python) -> PyResult<Py<PyArrayDyn<f32>>> {
+    let array = py_obj_to_array(input, py)?;
     let binding = array.clone();
     let shape = binding.shape();
     let vec = array.into_raw_vec();
@@ -42,9 +39,10 @@ pub fn cvt_color(
         CvtType::RGB2Gray
         | CvtType::RGB2GrayAverage
         | CvtType::RGB2GrayBt709
-        | CvtType::RGB2GrayBt2020 => Array2::from_shape_vec([shape[0], shape[1]], result_vec)
-            .unwrap()
-            .into_dyn(),
+        | CvtType::RGB2GrayBt2020
+        | CvtType::RGB2Luma => {
+            unsafe { Array2::from_shape_vec_unchecked([shape[0], shape[1]], result_vec) }.into_dyn()
+        }
         CvtType::CMYK2RGB
         | CvtType::RGB2YCbCr
         | CvtType::YCbCr2RGB
@@ -54,12 +52,14 @@ pub fn cvt_color(
         | CvtType::YCvCr2RGBBt709
         | CvtType::RGB2BGR
         | CvtType::BGR2RGB
-        | CvtType::GRAY2RGB => Array3::from_shape_vec([shape[0], shape[1], 3], result_vec)
-            .unwrap()
-            .into_dyn(),
-        CvtType::RGB2CMYK => Array3::from_shape_vec([shape[0], shape[1], 4], result_vec)
-            .unwrap()
-            .into_dyn(),
+        | CvtType::GRAY2RGB => {
+            unsafe { Array3::from_shape_vec_unchecked([shape[0], shape[1], 3], result_vec) }
+                .into_dyn()
+        }
+        CvtType::RGB2CMYK => {
+            unsafe { Array3::from_shape_vec_unchecked([shape[0], shape[1], 4], result_vec) }
+                .into_dyn()
+        }
     };
     Ok(array.to_pyarray(py).to_owned())
 }

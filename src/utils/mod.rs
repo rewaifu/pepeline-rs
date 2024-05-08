@@ -6,9 +6,14 @@ pub(crate) mod image {
 pub(crate) mod core {
     pub mod color_levels;
     pub mod convert;
-    pub mod cvt_color;
+    pub mod cvt_color_float;
+    pub mod cvt_constants;
     pub mod enums;
     pub mod noise;
+
+    pub mod array {
+        pub mod utils;
+    }
 }
 
 pub(crate) mod halftone {
