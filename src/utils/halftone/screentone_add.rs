@@ -39,11 +39,7 @@ pub fn screentone_rotate_add(
     }
 }
 
-pub fn screentone_add(
-    array: &mut Array2<f32>,
-    dot_size: usize,
-    dot_type: TypeDot,
-) {
+pub fn screentone_add(array: &mut Array2<f32>, dot_size: usize, dot_type: TypeDot) {
     let (dot, dot_inv) = create_dot(dot_size, dot_type);
     let lx_bias = dot_size / 2;
     let ly_bias = dot_size / 2;

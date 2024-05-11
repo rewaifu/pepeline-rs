@@ -232,7 +232,7 @@ fn dot_circle_inv(dot_size: usize) -> Array2<f32> {
 }
 
 fn dot(dot_inv: Array2<f32>) -> Array2<f32> {
-    let dot = dot_inv * -1.0 + 1.0;
+    let dot = 1.0 - dot_inv;
 
     return dot;
 }
