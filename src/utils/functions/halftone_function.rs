@@ -1,5 +1,5 @@
 use numpy::{PyArray2, PyReadonlyArray2, ToPyArray};
-use pyo3::{pyfunction, Py, PyResult, Python};
+use pyo3::{Py, pyfunction, PyResult, Python};
 
 use crate::utils::core::enums::TypeDot;
 use crate::utils::halftone::screentone_add::{screentone_add, screentone_rotate_add};
@@ -22,9 +22,7 @@ pub fn screentone<'py>(
     if angle != 0 {
         screentone_rotate_add(&mut array, dot_size, (angle as f32).to_radians(), dot_type);
     } else {
-        let lx_plus = dot_size / 2;
-        let ly_plus = dot_size / 2;
-        screentone_add(&mut array, dot_size, ly_plus, lx_plus, dot_type);
+        screentone_add(&mut array, dot_size, dot_type);
     }
 
     Ok(array.to_pyarray(py).to_owned())

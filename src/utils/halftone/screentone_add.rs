@@ -14,18 +14,15 @@ pub fn screentone_rotate_add(
     let mut src_values: f32;
     let mut colum: usize;
     let (w, h) = (array.shape()[0], array.shape()[1]);
-    let lx_plus = w / 2;
-    let ly_plus = h / 2;
+    let lx_bias = w / 2;
+    let ly_bias = h / 2;
     let cos_sin = compute_cos_sin(angle);
-    let ww = 0..w;
-    let hh = 0..h;
-    for ly in ww {
-        let ly2 = ly + ly_plus;
-
-        for lx in hh.clone() {
+    for ly in 0..w {
+        let ly2 = ly + ly_bias;
+        for lx in 0..h {
             let value = &mut array[[ly, lx]];
             if *value > 0.0 && *value < 1.0 {
-                let lx2 = lx + lx_plus;
+                let lx2 = lx + lx_bias;
                 let rot = rotate_pixel_coordinates(
                     lx2 as f32, ly2 as f32, w as f32, h as f32, cos_sin.0, cos_sin.1,
                 );
@@ -45,23 +42,21 @@ pub fn screentone_rotate_add(
 pub fn screentone_add(
     array: &mut Array2<f32>,
     dot_size: usize,
-    ly_plus: usize,
-    lx_plus: usize,
     dot_type: TypeDot,
 ) {
     let (dot, dot_inv) = create_dot(dot_size, dot_type);
+    let lx_bias = dot_size / 2;
+    let ly_bias = dot_size / 2;
     let mut src_values: f32;
     let mut colum: usize;
     let (w, h) = (array.shape()[0], array.shape()[1]);
-    let ww = 0..w;
-    let hh = 0..h;
-    for ly in ww {
-        let ly2 = ly + ly_plus;
+    for ly in 0..w {
+        let ly2 = ly + ly_bias;
         colum = ly2 / dot_size;
-        for lx in hh.clone() {
+        for lx in 0..h {
             let value = &mut array[[ly, lx]];
             if *value > 0.0 && *value < 1.0 {
-                let lx2 = lx + lx_plus;
+                let lx2 = lx + lx_bias;
                 src_values = if (colum + lx2 / dot_size) % 2 == 1 {
                     dot_inv[[lx2 % dot_size, ly2 % dot_size]]
                 } else {
