@@ -1,7 +1,7 @@
 use pyo3::pyclass;
 
-#[pyclass]
 #[derive(Clone)]
+#[pyclass]
 pub enum TypeNoise {
     PERLIN = 0,
     SIMPLEX = 1,
@@ -10,8 +10,8 @@ pub enum TypeNoise {
     PERLINSURFLET = 4,
 }
 
-#[pyclass]
 #[derive(Clone)]
+#[pyclass]
 pub enum CvtType {
     RGB2Gray = 0, //NTSC
     RGB2GrayAverage = 1,
@@ -32,7 +32,7 @@ pub enum CvtType {
 }
 
 #[pyclass]
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum TypeDot {
     CIRCLE = 0,
     CROSS = 1,

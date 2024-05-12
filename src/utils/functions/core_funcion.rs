@@ -47,7 +47,7 @@ pub fn noise_generate<'py>(
             for ((x, y), value) in array.indexed_iter_mut() {
                 *value = noise_2d(&type_fn, x, y, octaves, frequency, lacunarity);
             }
-            Ok(array.into_dyn().to_pyarray(py).to_owned())
+            Ok(array.into_dyn().to_pyarray_bound(py).into())
         }
         3 => {
             let mut array: Array3<f32> = Array3::zeros((size[0], size[1], size[2]));
@@ -55,7 +55,7 @@ pub fn noise_generate<'py>(
             for ((x, y, z), value) in array.indexed_iter_mut() {
                 *value = noise_3d(&type_fn, x, y, z, octaves, frequency, lacunarity);
             }
-            Ok(array.into_dyn().to_pyarray(py).to_owned())
+            Ok(array.into_dyn().to_pyarray_bound(py).into())
         }
         _ => Err(pyo3::exceptions::PyValueError::new_err(
             "Unsupported dimensions",

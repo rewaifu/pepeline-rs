@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Optional
 
 import numpy as np
 
@@ -42,8 +43,8 @@ class TypeDot(Enum):
 
 def read(
         path: str,
-        mode: None | int,
-        format: None | int
+        mode: Optional[int] = None,
+        format: Optional[int] = None
 ) -> np.ndarray:
     """ The function to read the image. input parameters:
     \n path -> str file path 
@@ -54,8 +55,8 @@ def read(
 def screentone(
         array: np.ndarray,
         dot_size: int,
-        angle: None | int,
-        dot_type: None | TypeDot
+        angle: Optional[int] = None,
+        dot_type: Optional[TypeDot] = None
 ) -> np.ndarray:
     """
     Halftone overlay function.
@@ -76,6 +77,14 @@ def screentone(
     - 'dot_type' specifies the type of dot pattern to use. If not provided, a default dot pattern is used.
     The function returns the array with the halftone overlay applied.
     """
+
+
+def halftone(
+        array: np.ndarray,
+        dot_size: int,
+        angle: Optional[int] = None,
+        dot_type: Optional[TypeDot] = None
+) -> np.ndarray: ...
 
 
 def cvt_color(array: np.ndarray, cvt_type: CvtType) -> np.ndarray:
@@ -102,11 +111,11 @@ def crop_cord(array: np.ndarray) -> (
 
 def fast_color_level(
         array: np.ndarray,
-        in_low: None | int,
-        in_high: None | int,
-        out_low: None | int,
-        out_high: None | int,
-        gamma: None | float,
+        in_low: Optional[int] = 0,
+        in_high: Optional[int] = 255,
+        out_low: Optional[int] = 0,
+        out_high: Optional[int] = 255,
+        gamma: Optional[float] = 1.0,
 ) -> np.ndarray:
     """ array:np.float32
     \n in_low...out_high:uint8
@@ -119,7 +128,7 @@ def noise_generate(
         octaves: int,
         frequency: float,
         lacunarity: float,
-        seed: int | None,
+        seed: Optional[int] = None,
 ) -> np.ndarray:
     """ size: tuple 2d or 3d
     \n type_noise: TypeNoise

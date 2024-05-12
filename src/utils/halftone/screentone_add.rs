@@ -24,7 +24,7 @@ pub fn screentone_rotate_add(
             if *value > 0.0 && *value < 1.0 {
                 let lx2 = lx + lx_bias;
                 let rot = rotate_pixel_coordinates(
-                    lx2 as f32, ly2 as f32, w as f32, h as f32, cos_sin.0, cos_sin.1,
+                    lx2 as f32, ly2 as f32, w as f32, h as f32, cos_sin[0], cos_sin[1],
                 );
                 colum = rot.1 / dot_size;
                 src_values = if (colum + rot.0 / dot_size) % 2 == 1 {

@@ -1,8 +1,25 @@
 use numpy::{PyArray2, PyReadonlyArray2, ToPyArray};
-use pyo3::{pyfunction, Py, PyResult, Python};
+use pyo3::{Py, pyfunction, PyResult, Python};
 
 use crate::utils::core::enums::TypeDot;
+// use crate::utils::halftone::halftone_add::{halftone_add, RgbHalftone};
 use crate::utils::halftone::screentone_add::{screentone_add, screentone_rotate_add};
+
+// #[pyfunction]
+// pub fn halftone<'py>(
+//     input: PyReadonlyArray3<f32>,
+//     halftone: RgbHalftone,
+//     py: Python,
+// ) -> PyResult<Py<PyArray3<f32>>> {
+//     // halftone overlay function:
+//     //     input -> array only 2D f32 0-1
+//     //     dot_size -> uint screenton size in pixels
+//     //     angle -> i16 degree by which we rotate the pattern
+//     let mut array = input.as_array().to_owned();
+//     halftone_add(&mut array, halftone);
+//
+//     Ok(array.to_pyarray_bound(py).into())
+// }
 
 #[pyfunction]
 pub fn screentone<'py>(
@@ -25,5 +42,5 @@ pub fn screentone<'py>(
         screentone_add(&mut array, dot_size, dot_type);
     }
 
-    Ok(array.to_pyarray(py).to_owned())
+    Ok(array.to_pyarray_bound(py).into())
 }

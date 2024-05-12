@@ -10,14 +10,11 @@ pub(crate) mod core {
     pub mod cvt_constants;
     pub mod enums;
     pub mod noise;
-
-    pub mod array {
-        pub mod utils;
-    }
 }
 
 pub(crate) mod halftone {
     pub mod dot;
+    // pub mod halftone_add;
     pub mod screentone_add;
     pub mod utils_halftone;
 }

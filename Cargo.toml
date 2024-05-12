@@ -10,8 +10,8 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-pyo3 = { version = "0.20.0", features = ["extension-module"] }
-numpy = "0.20.0"
+pyo3 = { version = "0.21", features = ["gil-refs"] }
+numpy = "0.21.0"
 ndarray = "0.15.6"
 image = "0.25.0"
 zune-jpeg = "0.4.11"

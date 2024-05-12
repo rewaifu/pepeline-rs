@@ -15,8 +15,8 @@ pub fn rotate_pixel_coordinates(
     (rotated_x, rotated_y)
 }
 
-pub fn compute_cos_sin(theta: f32) -> (f32, f32) {
+pub fn compute_cos_sin(theta: f32) -> [f32; 2] {
     let cos_theta = theta.cos();
     let sin_theta = theta.sin();
-    (cos_theta, sin_theta)
+    [cos_theta, sin_theta]
 }

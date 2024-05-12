@@ -1,8 +1,7 @@
 use ndarray::{Array2, Array3};
 use numpy::{PyArrayDyn, PyReadonlyArrayDyn, ToPyArray};
-use pyo3::{pyfunction, Py, PyObject, PyResult, Python};
+use pyo3::{pyfunction, Py, PyResult, Python};
 
-use crate::utils::core::array::utils::py_obj_to_array;
 use crate::utils::core::color_levels::levels;
 use crate::utils::core::cvt_color_float::cvt_color_float;
 use crate::utils::core::enums::CvtType;
@@ -22,18 +21,23 @@ pub fn fast_color_level<'py>(
     let out_low = out_low.unwrap_or(0u8);
     let out_high = out_high.unwrap_or(255u8);
     let gamma = gamma.unwrap_or(1.0f32);
-    let array = input.as_array().to_owned();
-    let array = levels(array, in_low, in_high, out_low, out_high, gamma);
+    let mut array = input.as_array().to_owned();
 
-    Ok(array.to_pyarray(py).to_owned())
+    levels(&mut array, in_low, in_high, out_low, out_high, gamma);
+    Ok(array.to_pyarray_bound(py).into())
 }
 
 #[pyfunction]
-pub fn cvt_color(input: PyObject, cvt_type: CvtType, py: Python) -> PyResult<Py<PyArrayDyn<f32>>> {
-    let array = py_obj_to_array(input, py)?;
-    let binding = array.clone();
-    let shape = binding.shape();
-    let vec = array.into_raw_vec();
+pub fn cvt_color<'py>(
+    img: PyReadonlyArrayDyn<f32>,
+    cvt_type: CvtType,
+    py: Python,
+) -> PyResult<Py<PyArrayDyn<f32>>> {
+    let array = img.as_array();
+    let array_shape = array.clone().to_owned();
+    let shape = array_shape.shape();
+
+    let vec = array.to_owned().into_raw_vec();
     let result_vec = cvt_color_float(&vec, cvt_type.clone());
     let array = match cvt_type {
         CvtType::RGB2Gray
@@ -61,5 +65,6 @@ pub fn cvt_color(input: PyObject, cvt_type: CvtType, py: Python) -> PyResult<Py<
                 .into_dyn()
         }
     };
-    Ok(array.to_pyarray(py).to_owned())
+
+    Ok(array.to_pyarray_bound(py).into())
 }

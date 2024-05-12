@@ -54,14 +54,14 @@ pub fn read(path: String, mode: Option<u8>, format: Option<u8>, py: Python) -> P
 
     match format {
         0 => match all_read_f32(path, mode) {
-            Ok(array) => Ok(array.to_pyarray(py).into()),
+            Ok(array) => Ok(array.to_pyarray_bound(py).into()),
             Err(err) => Err(PyErr::new::<PyOSError, _>(format!(
                 "Error reading file: {}",
                 err
             ))),
         },
         _ => match all_read_u8(path, mode) {
-            Ok(array) => Ok(array.to_pyarray(py).into()),
+            Ok(array) => Ok(array.to_pyarray_bound(py).into()),
             Err(err) => Err(PyErr::new::<PyOSError, _>(format!(
                 "Error reading file: {}",
                 err
