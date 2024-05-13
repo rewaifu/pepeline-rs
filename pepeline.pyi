@@ -79,12 +79,12 @@ def screentone(
     """
 
 
-def halftone(
-        array: np.ndarray,
-        dot_size: int,
-        angle: Optional[int] = None,
-        dot_type: Optional[TypeDot] = None
-) -> np.ndarray: ...
+# def halftone(
+#         array: np.ndarray,
+#         dot_size: int,
+#         angle: Optional[int] = None,
+#         dot_type: Optional[TypeDot] = None
+# ) -> np.ndarray: ...
 
 
 def cvt_color(array: np.ndarray, cvt_type: CvtType) -> np.ndarray:
