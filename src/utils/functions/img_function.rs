@@ -4,7 +4,6 @@ use numpy::{PyReadonlyArrayDyn, ToPyArray};
 use pyo3::{PyErr, pyfunction, PyObject, PyResult, Python};
 use pyo3::exceptions::{PyOSError, PyTypeError};
 
-use crate::utils::core::convert::f32_to_u8;
 use crate::utils::image::decode::{all_read_f32, all_read_u8};
 use crate::utils::image::save::save_img_vec;
 
@@ -24,7 +23,7 @@ pub fn save(input: PyObject, out_path: String, py: Python) -> PyResult<()> {
         shape = array8.shape().to_vec();
     } else if let Ok(array_py) = input.extract::<PyReadonlyArrayDyn<f32>>(py) {
         let arr32 = array_py.as_array().to_owned();
-        vec_img = f32_to_u8(&arr32.clone().into_raw_vec());
+        vec_img = arr32.iter().map(|&x| (x * 255.0) as u8).collect();
         shape = arr32.shape().to_vec();
     } else {
         return Err(PyErr::new::<PyTypeError, _>("Unsupported array type"));
