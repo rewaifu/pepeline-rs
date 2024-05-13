@@ -8,6 +8,7 @@ pub fn save_img_vec(
     shape: &[usize],
     out_path: &Path,
 ) -> Result<(), Box<dyn Error>> {
+    println!("{:?}", shape);
     match shape.len() {
         2 => {
             let img = ImageBuffer::from_fn(shape[1] as u32, shape[0] as u32, move |x, y| {

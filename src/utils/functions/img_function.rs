@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use numpy::{PyReadonlyArrayDyn, ToPyArray};
+use pyo3::{PyErr, pyfunction, PyObject, PyResult, Python};
 use pyo3::exceptions::{PyOSError, PyTypeError};
-use pyo3::{pyfunction, PyErr, PyObject, PyResult, Python};
 
 use crate::utils::core::convert::f32_to_u8;
 use crate::utils::image::decode::{all_read_f32, all_read_u8};
@@ -20,7 +20,7 @@ pub fn save(input: PyObject, out_path: String, py: Python) -> PyResult<()> {
     //array extension definition
     if let Ok(array_py) = input.extract::<PyReadonlyArrayDyn<u8>>(py) {
         let array8 = array_py.as_array().to_owned();
-        vec_img = array8.clone().into_raw_vec();
+        vec_img = array8.iter().map(|&x| x).collect();
         shape = array8.shape().to_vec();
     } else if let Ok(array_py) = input.extract::<PyReadonlyArrayDyn<f32>>(py) {
         let arr32 = array_py.as_array().to_owned();
@@ -29,7 +29,6 @@ pub fn save(input: PyObject, out_path: String, py: Python) -> PyResult<()> {
     } else {
         return Err(PyErr::new::<PyTypeError, _>("Unsupported array type"));
     }
-
     //saving the finished vector, on the passed path
     match save_img_vec(&vec_img, &shape, Path::new(&out_path)) {
         Ok(()) => Ok(()),
