@@ -11,6 +11,7 @@ use crate::utils::image::save::save_img_vec;
 pub fn save(input: PyObject, out_path: String, py: Python) -> PyResult<()> {
     //function to save an image, currently supports:
     //   f32 0-1 array
+    //   f64 0-1 array
     //   u8 0-255 array
 
     let vec_img: Vec<u8>;
@@ -25,6 +26,10 @@ pub fn save(input: PyObject, out_path: String, py: Python) -> PyResult<()> {
         let arr32 = array_py.as_array().to_owned();
         vec_img = arr32.iter().map(|&x| (x * 255.0) as u8).collect();
         shape = arr32.shape().to_vec();
+    } else if let Ok(array_py) = input.extract::<PyReadonlyArrayDyn<f64>>(py) {
+        let arr64 = array_py.as_array().to_owned();
+        vec_img = arr64.iter().map(|&x| (x * 255.0) as u8).collect();
+        shape = arr64.shape().to_vec();
     } else {
         return Err(PyErr::new::<PyTypeError, _>("Unsupported array type"));
     }
