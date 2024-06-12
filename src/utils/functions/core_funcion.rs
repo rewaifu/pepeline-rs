@@ -143,7 +143,7 @@ pub fn best_tile(input: PyReadonlyArray2<f32>, tile_size: usize) -> PyResult<(us
         if right {
             for col in 0..(img_shape.1 - tile_size) {
                 let sum_left = laplacian_abs.slice(s![row..(tile_size + row), col]).sum();
-                let sum_right = laplacian_abs.slice(s![row..(tile_size + row), (tile_size + col)]).sum();
+                let sum_right = laplacian_abs.slice(s![row..(tile_size + row), tile_size + col]).sum();
 
                 mean_intensity = (mean_intensity - (sum_left / tile_area)) + (sum_right / tile_area);
 
@@ -155,7 +155,7 @@ pub fn best_tile(input: PyReadonlyArray2<f32>, tile_size: usize) -> PyResult<(us
             }
             let col = img_shape.1 - tile_size;
             let sum_left = laplacian_abs.slice(s![row, col..(tile_size + col)]).sum();
-            let sum_right = laplacian_abs.slice(s![(tile_size + row), col..(tile_size + col)]).sum();
+            let sum_right = laplacian_abs.slice(s![ tile_size + row, col..(tile_size + col)]).sum();
 
             mean_intensity = (mean_intensity - (sum_left / tile_area)) + (sum_right / tile_area);
 
@@ -180,7 +180,7 @@ pub fn best_tile(input: PyReadonlyArray2<f32>, tile_size: usize) -> PyResult<(us
             }
             let col = img_shape.1 - tile_size;
             let sum_left = laplacian_abs.slice(s![row, col..(img_shape.1 - col - 1)]).sum();
-            let sum_right = laplacian_abs.slice(s![(tile_size + row), col..(img_shape.1 - (tile_size + col) - 1)]).sum();
+            let sum_right = laplacian_abs.slice(s![ tile_size + row, col..(img_shape.1 - (tile_size + col) - 1)]).sum();
 
             mean_intensity = (mean_intensity - (sum_left / tile_area)) + (sum_right / tile_area);
 
