@@ -94,6 +94,17 @@ def screentone(
 #         k_bias: [int]
 # ) -> np.ndarray: ...
 
+def best_tile(array: np.ndarray, tile_size: int) -> (int, int):
+    """
+Finds the top-left corner of the tile with the highest mean Laplacian intensity.
+# Arguments
+* `input` - 2D image array (PyReadonlyArray2<f32>).
+* `tile_size` - Size of the tile in pixels.
+
+# Returns
+* `(usize, usize)` - Coordinates of the top-left corner of the best tile.
+"""
+
 
 def cvt_color(array: np.ndarray, cvt_type: CvtType) -> np.ndarray:
     """

@@ -1,8 +1,8 @@
 use std::cmp::{max, min};
 
-use ndarray::{Array2, Array3};
+use ndarray::{Array2, Array3, s};
 use noise::{NoiseFn, OpenSimplex, Perlin, PerlinSurflet, Simplex, SuperSimplex};
-use numpy::{PyArrayDyn, PyReadonlyArrayDyn, ToPyArray};
+use numpy::{PyArrayDyn, PyReadonlyArray2, PyReadonlyArrayDyn, ToPyArray};
 use pyo3::{Py, pyfunction, PyResult, Python};
 use rand::Rng;
 
@@ -115,39 +115,83 @@ pub fn crop_cord(input: PyReadonlyArrayDyn<f32>) -> PyResult<(usize, usize, usiz
     }
 }
 
-// #[pyfunction]
-// pub fn cmyk_shift<'py>(img: PyReadonlyArray3<f32>, c_bias: Vec<isize>, m_bias: Vec<isize>, y_bias: Vec<isize>, k_bias: Vec<isize>, py: Python) -> PyResult<Py<PyArray3<f32>>> {
-//     let array = img.as_array().to_owned();
-//     let shape_img = array.shape();
-//     let hh = 30;
-//     let mut result: Array3<f32> = Array3::ones([shape_img[0], shape_img[1], shape_img[2]]);
-//     for x in 0..shape_img[0] {
-//         let amount_cx = x as isize + c_bias[0];
-//         let amount_mx = x as isize + m_bias[0];
-//         let amount_yx = x as isize + y_bias[0];
-//         let amount_kx = x as isize + k_bias[0];
-//         let a = rand::thread_rng().gen_range(-hh..=hh) as isize;
-//         let b = rand::thread_rng().gen_range(-hh..=hh) as isize;
-//         let c = rand::thread_rng().gen_range(-hh..=hh) as isize;
-//         let d = rand::thread_rng().gen_range(-hh..=hh) as isize;
-//         for y in 0..shape_img[1] {
-//             let amount_cy = y as isize + c_bias[1] + a;
-//             let amount_my = y as isize + m_bias[1] + b;
-//             let amount_yy = y as isize + y_bias[1] + c;
-//             let amount_ky = y as isize + k_bias[1] + d;
-//             if amount_cx > 0 && amount_cy > 0 && amount_cx < shape_img[0] as isize && amount_cy < shape_img[1] as isize {
-//                 result[[x, y, 0]] = array[[amount_cx as usize, amount_cy as usize, 0]]
-//             }
-//             if amount_mx > 0 && amount_my > 0 && amount_mx < shape_img[0] as isize && amount_my < shape_img[1] as isize {
-//                 result[[x, y, 1]] = array[[amount_mx as usize, amount_my as usize, 1]]
-//             }
-//             if amount_yx > 0 && amount_yy > 0 && amount_yx < shape_img[0] as isize && amount_yy < shape_img[1] as isize {
-//                 result[[x, y, 2]] = array[[amount_yx as usize, amount_yy as usize, 2]]
-//             }
-//             if amount_kx > 0 && amount_ky > 0 && amount_kx < shape_img[0] as isize && amount_ky < shape_img[1] as isize {
-//                 result[[x, y, 3]] = array[[amount_kx as usize, amount_ky as usize, 3]]
-//             }
-//         }
-//     }
-//     Ok(result.to_pyarray_bound(py).into())
-// }
+#[pyfunction]
+/// Finds the top-left corner of the tile with the highest mean Laplacian intensity.
+///
+/// # Arguments
+/// * `input` - 2D image array (PyReadonlyArray2<f32>).
+/// * `tile_size` - Size of the tile in pixels.
+///
+/// # Returns
+/// * `(usize, usize)` - Coordinates of the top-left corner of the best tile.
+pub fn best_tile(input: PyReadonlyArray2<f32>, tile_size: usize) -> PyResult<(usize, usize)> {
+    let laplacian_abs = input.as_array().to_owned();
+    let img_shape = laplacian_abs.dim();
+    let tile_area = (tile_size * tile_size) as f32;
+
+    let mut best_tile = [0.0, 0f32, 0f32];
+    let mut mean_intensity = laplacian_abs.slice(s![0..tile_size, 0..tile_size]).mean().unwrap();
+    let mut right = true;
+
+    if best_tile[0] < mean_intensity {
+        best_tile[0] = mean_intensity;
+        best_tile[1] = 0f32;
+        best_tile[2] = 0f32;
+    }
+
+    for row in 0..(img_shape.0 - tile_size) {
+        if right {
+            for col in 0..(img_shape.1 - tile_size) {
+                let sum_left = laplacian_abs.slice(s![row..(tile_size + row), col]).sum();
+                let sum_right = laplacian_abs.slice(s![row..(tile_size + row), (tile_size + col)]).sum();
+
+                mean_intensity = (mean_intensity - (sum_left / tile_area)) + (sum_right / tile_area);
+
+                if best_tile[0] < mean_intensity {
+                    best_tile[0] = mean_intensity;
+                    best_tile[1] = row as f32;
+                    best_tile[2] = col as f32;
+                }
+            }
+            let col = img_shape.1 - tile_size;
+            let sum_left = laplacian_abs.slice(s![row, col..(tile_size + col)]).sum();
+            let sum_right = laplacian_abs.slice(s![(tile_size + row), col..(tile_size + col)]).sum();
+
+            mean_intensity = (mean_intensity - (sum_left / tile_area)) + (sum_right / tile_area);
+
+            if best_tile[0] < mean_intensity {
+                best_tile[0] = mean_intensity;
+                best_tile[1] = row as f32;
+                best_tile[2] = col as f32;
+            }
+            right = false;
+        } else {
+            for col in 0..(img_shape.1 - tile_size) {
+                let sum_left = laplacian_abs.slice(s![row..(tile_size + row), img_shape.1 - col - 1]).sum();
+                let sum_right = laplacian_abs.slice(s![row..(tile_size + row), img_shape.1 - (tile_size + col) - 1]).sum();
+
+                mean_intensity = (mean_intensity - (sum_left / tile_area)) + (sum_right / tile_area);
+
+                if best_tile[0] < mean_intensity {
+                    best_tile[0] = mean_intensity;
+                    best_tile[1] = row as f32;
+                    best_tile[2] = col as f32;
+                }
+            }
+            let col = img_shape.1 - tile_size;
+            let sum_left = laplacian_abs.slice(s![row, col..(img_shape.1 - col - 1)]).sum();
+            let sum_right = laplacian_abs.slice(s![(tile_size + row), col..(img_shape.1 - (tile_size + col) - 1)]).sum();
+
+            mean_intensity = (mean_intensity - (sum_left / tile_area)) + (sum_right / tile_area);
+
+            if best_tile[0] < mean_intensity {
+                best_tile[0] = mean_intensity;
+                best_tile[1] = row as f32;
+                best_tile[2] = col as f32;
+            }
+            right = true;
+        }
+    }
+
+    Ok((best_tile[1] as usize, best_tile[2] as usize))
+}
