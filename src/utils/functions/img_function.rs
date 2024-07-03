@@ -6,6 +6,7 @@ use pyo3::exceptions::{PyOSError, PyTypeError};
 
 use crate::utils::image::decode::{all_read_f32, all_read_u8};
 use crate::utils::image::save::save_img_vec;
+use crate::utils::image::size_decode::path_to_size;
 
 #[pyfunction]
 pub fn save(input: PyObject, out_path: String, py: Python) -> PyResult<()> {
@@ -71,4 +72,29 @@ pub fn read(path: String, mode: Option<u8>, format: Option<u8>, py: Python) -> P
             ))),
         },
     }
+}
+/// Reads the dimensions (width and height) of the image at the given path.
+///
+/// # Arguments
+///
+/// * `path` - A string slice that holds the path to the image file.
+///
+/// # Returns
+///
+/// A tuple containing the width and height of the image, or an error if the image could not be read.
+///
+/// # Examples
+///
+/// ```
+/// let dimensions = read_size(String::from("path/to/image.png"))?;
+/// println!("Width: {}, Height: {}", dimensions.0, dimensions.1);
+/// ```
+///
+/// # Errors
+///
+/// This function will return an error if the file does not exist, the file is not an image,
+/// or if there is an issue reading the image dimensions.
+#[pyfunction]
+pub fn read_size(path: String) -> PyResult<(u32, u32)> {
+    path_to_size(Path::new(&path))
 }

@@ -50,6 +50,24 @@ def read(
     \n path -> str file path 
     \n mode -> uint 0 -> gray 1-> rgb 2-> psd dynamic format, and in other cases rgb, None = 2
     \n format -> uint 0 -> f32 0-1 img, 1+ -> u8 0-255, None = 1"""
+def read_size(path: str) -> tuple[int, int]:
+    """
+    Reads the dimensions (width and height) of the image at the given path.
+
+    Arguments:
+    path -- A string that holds the path to the image file.
+
+    Returns:
+    A tuple containing the width and height of the image.
+
+    Examples:
+    dimensions = read_size("path/to/image.png")
+    print(f"Width: {dimensions[0]}, Height: {dimensions[1]}")
+
+    Errors:
+    This function will raise an error if the file does not exist, the file is not an image,
+    or if there is an issue reading the image dimensions.
+    """
 
 
 def screentone(

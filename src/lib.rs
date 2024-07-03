@@ -10,6 +10,7 @@ mod utils;
 #[pymodule]
 fn pepeline(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(img_function::read, m)?)?;
+    m.add_function(wrap_pyfunction!(img_function::read_size, m)?)?;
     m.add_function(wrap_pyfunction!(halftone_function::screentone, m)?)?;
     // m.add_function(wrap_pyfunction!(halftone_function::halftone, m)?)?;
     m.add_function(wrap_pyfunction!(core_funcion::noise_generate, m)?)?;
