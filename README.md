@@ -6,8 +6,8 @@
 # pepeline-rs
 Fast rust-python librarian for internal needs of an organization
 ```py
-from pepeline import screentone, fast_color_level, read, save, cvt_color, CvtType
-img = read(<"img path">, 0, 0)
+from pepeline import screentone, fast_color_level, read, save, cvt_color, CvtType, ImgColor, ImgFormat
+img = read(<"img path">, ImgColor.GRAY, ImgFormat.F32)
 img = fast_color_level(
     img,     
     in_low = 10,
