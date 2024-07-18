@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 
 use utils::functions::{color_function, core_funcion, halftone_function, img_function};
 
-use crate::utils::core::enums::{CvtType, TypeDot, TypeNoise};
+use crate::utils::core::enums::{CvtType, ImgColor, ImgFormat, TypeDot, TypeNoise};
 
 mod utils;
 
@@ -23,5 +23,7 @@ fn pepeline(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<TypeNoise>()?;
     m.add_class::<TypeDot>()?;
     m.add_class::<CvtType>()?;
+    m.add_class::<ImgColor>()?;
+    m.add_class::<ImgFormat>()?;
     Ok(())
 }

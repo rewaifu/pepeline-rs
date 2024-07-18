@@ -3,6 +3,7 @@ use std::path::Path;
 use numpy::{PyReadonlyArrayDyn, ToPyArray};
 use pyo3::{PyErr, pyfunction, PyObject, PyResult, Python};
 use pyo3::exceptions::{PyOSError, PyTypeError};
+use crate::utils::core::enums::{ImgColor, ImgFormat};
 
 use crate::utils::image::decode::{all_read_f32, all_read_u8};
 use crate::utils::image::save::save_img_vec;
@@ -45,7 +46,7 @@ pub fn save(input: PyObject, out_path: String, py: Python) -> PyResult<()> {
 }
 
 #[pyfunction]
-pub fn read(path: String, mode: Option<u8>, format: Option<u8>, py: Python) -> PyResult<PyObject> {
+pub fn read(path: String, mode: Option<ImgColor>, format: Option<ImgFormat>, py: Python) -> PyResult<PyObject> {
     // The function to read the image.
     // Input parameters:
     //      path -> str file path
@@ -53,18 +54,18 @@ pub fn read(path: String, mode: Option<u8>, format: Option<u8>, py: Python) -> P
     //      format -> uint 0 -> f32 0-1 img, 1+ -> u8 0-255, None = 1
 
     let path = Path::new(&path);
-    let mode = mode.unwrap_or(2u8);
-    let format = format.unwrap_or(1u8);
+    let mode = mode.unwrap_or(ImgColor::DYNAMIC);
+    let format = format.unwrap_or(ImgFormat::U8);
 
     match format {
-        0 => match all_read_f32(path, mode) {
+        ImgFormat::F32 => match all_read_f32(path, mode) {
             Ok(array) => Ok(array.to_pyarray_bound(py).into()),
             Err(err) => Err(PyErr::new::<PyOSError, _>(format!(
                 "Error reading file: {}",
                 err
             ))),
         },
-        _ => match all_read_u8(path, mode) {
+        ImgFormat::U8 => match all_read_u8(path, mode) {
             Ok(array) => Ok(array.to_pyarray_bound(py).into()),
             Err(err) => Err(PyErr::new::<PyOSError, _>(format!(
                 "Error reading file: {}",

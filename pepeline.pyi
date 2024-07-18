@@ -1,9 +1,21 @@
 from __future__ import annotations
 
+import random
 from enum import Enum
 from typing import Optional
 
 import numpy as np
+
+
+class ImgColor(Enum):
+    GRAY = 0,
+    RGB = 1,
+    DYNAMIC = 2
+
+
+class ImgFormat(Enum):
+    U8 = 0,
+    F32 = 1
 
 
 class TypeNoise(Enum):
@@ -43,13 +55,15 @@ class TypeDot(Enum):
 
 def read(
         path: str,
-        mode: Optional[int] = None,
-        format: Optional[int] = None
+        mode: Optional[ImgColor] = ImgColor.DYNAMIC,
+        format: Optional[ImgFormat] = ImgFormat.U8
 ) -> np.ndarray:
     """ The function to read the image. input parameters:
     \n path -> str file path 
-    \n mode -> uint 0 -> gray 1-> rgb 2-> psd dynamic format, and in other cases rgb, None = 2
-    \n format -> uint 0 -> f32 0-1 img, 1+ -> u8 0-255, None = 1"""
+    \n mode -> psd dynamic format, and in other cases rgb, None = ImgColor.DYNAMIC
+    \n format -> f32 0-1 img, u8 0-255, None = ImgFormat.U8"""
+
+
 def read_size(path: str) -> tuple[int, int]:
     """
     Reads the dimensions (width and height) of the image at the given path.
@@ -73,8 +87,8 @@ def read_size(path: str) -> tuple[int, int]:
 def screentone(
         array: np.ndarray,
         dot_size: int,
-        angle: Optional[int] = None,
-        dot_type: Optional[TypeDot] = None
+        angle: Optional[int] = 0,
+        dot_type: Optional[TypeDot] = 7
 ) -> np.ndarray:
     """
     Halftone overlay function.
@@ -165,7 +179,7 @@ def noise_generate(
         octaves: int,
         frequency: float,
         lacunarity: float,
-        seed: Optional[int] = None,
+        seed: Optional[int] = random.randint(0,20000),
 ) -> np.ndarray:
     """ size: tuple 2d or 3d
     \n type_noise: TypeNoise

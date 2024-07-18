@@ -13,6 +13,7 @@ use crate::utils::core::convert::{
     luma2array, luma2arrayf32, rgb2array, rgb2arrayf32, rgb8_to_gray32, rgb8_to_gray8, u16_to_f32,
     u16_to_u8, u8_to_f32,
 };
+use crate::utils::core::enums::ImgColor;
 
 pub(crate) fn gray_img_open(bytes: &[u8]) -> Result<Array2<u8>, Box<dyn Error>> {
     let img = image::io::Reader::new(Cursor::new(bytes))
@@ -275,54 +276,54 @@ pub(crate) fn psd_din32_decode(img: &[u8]) -> Result<ArrayD<f32>, Box<dyn Error>
     }
 }
 
-pub fn all_read_u8(path: &Path, mode: u8) -> Result<ArrayD<u8>, Box<dyn Error>> {
+pub fn all_read_u8(path: &Path, mode: ImgColor) -> Result<ArrayD<u8>, Box<dyn Error>> {
     let img = FileBuffer::open(path).map_err(|err| Box::new(err) as Box<dyn Error>)?;
     let img_magic_byte = &img[..4];
     match img_magic_byte {
         [255, 216, 255, 224] | [255, 216, 255, 225] => match &img[6..8] {
             [74, 70] | [69, 120] => match mode {
-                0 => Ok(gray_img_open(&img)?.into_dyn()),
-                _ => Ok(rgb_img_open(&img)?.into_dyn()),
+                ImgColor::GRAY => Ok(gray_img_open(&img)?.into_dyn()),
+                ImgColor::RGB | ImgColor::DYNAMIC => Ok(rgb_img_open(&img)?.into_dyn()),
             },
             _ => match mode {
-                0 => Ok(jpg_gray_img_open(&img)?.into_dyn()),
-                _ => Ok(jpg_rgb_img_open(&img)?.into_dyn()),
+                ImgColor::GRAY => Ok(jpg_gray_img_open(&img)?.into_dyn()),
+                ImgColor::RGB | ImgColor::DYNAMIC => Ok(jpg_rgb_img_open(&img)?.into_dyn()),
             },
         },
         [56, 66, 80, 83] => match mode {
-            0 => Ok(psd_gray_decode(&img)?.into_dyn()),
-            1 => Ok(psd_rgb_decode(&img)?.into_dyn()),
-            _ => Ok(psd_din_decode(&img)?.into_dyn()),
+            ImgColor::GRAY => Ok(psd_gray_decode(&img)?.into_dyn()),
+            ImgColor::RGB => Ok(psd_rgb_decode(&img)?.into_dyn()),
+            ImgColor::DYNAMIC => Ok(psd_din_decode(&img)?.into_dyn()),
         },
         _ => match mode {
-            0 => Ok(gray_img_open(&img)?.into_dyn()),
-            _ => Ok(rgb_img_open(&img)?.into_dyn()),
+            ImgColor::GRAY => Ok(gray_img_open(&img)?.into_dyn()),
+            ImgColor::RGB | ImgColor::DYNAMIC => Ok(rgb_img_open(&img)?.into_dyn()),
         },
     }
 }
 
-pub fn all_read_f32(path: &Path, mode: u8) -> Result<ArrayD<f32>, Box<dyn Error>> {
+pub fn all_read_f32(path: &Path, mode: ImgColor) -> Result<ArrayD<f32>, Box<dyn Error>> {
     let img = FileBuffer::open(path).map_err(|err| Box::new(err) as Box<dyn Error>)?;
     let img_magic_byte = &img[..4];
     match img_magic_byte {
         [255, 216, 255, 224] | [255, 216, 255, 225] => match &img[6..8] {
             [74, 70] | [69, 120] => match mode {
-                0 => Ok(gray_img_openf32(&img)?.into_dyn()),
-                _ => Ok(rgb_img_openf32(&img)?.into_dyn()),
+                ImgColor::GRAY => Ok(gray_img_openf32(&img)?.into_dyn()),
+                ImgColor::RGB | ImgColor::DYNAMIC => Ok(rgb_img_openf32(&img)?.into_dyn()),
             },
             _ => match mode {
-                0 => Ok(jpg_gray_img_openf32(&img)?.into_dyn()),
-                _ => Ok(jpg_rgb_img_openf32(&img)?.into_dyn()),
+                ImgColor::GRAY => Ok(jpg_gray_img_openf32(&img)?.into_dyn()),
+                ImgColor::RGB | ImgColor::DYNAMIC => Ok(jpg_rgb_img_openf32(&img)?.into_dyn()),
             },
         },
         [56, 66, 80, 83] => match mode {
-            0 => Ok(psd_gray32_decode(&img)?.into_dyn()),
-            1 => Ok(psd_rgb32_decode(&img)?.into_dyn()),
-            _ => Ok(psd_din32_decode(&img)?.into_dyn()),
+            ImgColor::GRAY => Ok(psd_gray32_decode(&img)?.into_dyn()),
+            ImgColor::RGB => Ok(psd_rgb32_decode(&img)?.into_dyn()),
+            ImgColor::DYNAMIC => Ok(psd_din32_decode(&img)?.into_dyn()),
         },
         _ => match mode {
-            0 => Ok(gray_img_openf32(&img)?.into_dyn()),
-            _ => Ok(rgb_img_openf32(&img)?.into_dyn()),
+            ImgColor::GRAY => Ok(gray_img_openf32(&img)?.into_dyn()),
+            ImgColor::RGB | ImgColor::DYNAMIC => Ok(rgb_img_openf32(&img)?.into_dyn()),
         },
     }
 }

@@ -1,160 +1,95 @@
+use std::io::Cursor;
 use std::path::Path;
 use filebuffer::FileBuffer;
 use pyo3::prelude::*;
 use pyo3::exceptions::{PyOSError, PyValueError};
 
-/// Reads a 32-bit value from a byte array at the specified offset.
-///
-/// # Arguments
-///
-/// * `bytes` - Byte array.
-/// * `offset` - Offset in the byte array.
-///
-/// # Returns
-///
-/// 32-bit value.
-fn read_u32(bytes: &[u8], offset: usize) -> u32 {
-    u32::from_be_bytes([bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]])
+
+fn read_u32(bytes: &[u8]) -> u32 {
+    u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
 }
 
-/// Reads a 16-bit value from a byte array at the specified offset.
-///
-/// # Arguments
-///
-/// * `bytes` - Byte array.
-/// * `offset` - Offset in the byte array.
-///
-/// # Returns
-///
-/// 16-bit value.
-fn read_u16(bytes: &[u8], offset: usize) -> u16 {
-    u16::from_be_bytes([bytes[offset], bytes[offset + 1]])
+fn read_u16(bytes: &[u8]) -> u16 {
+    u16::from_be_bytes([bytes[0], bytes[1]])
 }
 
-/// Extracts the width and height from PNG bytes.
-///
-/// # Arguments
-///
-/// * `png_bytes` - Byte array representing the PNG file.
-///
-/// # Returns
-///
-/// A tuple `(width, height)` if the IHDR chunk is found, otherwise an error.
-fn png_size(png_bytes: &[u8]) -> PyResult<(u32, u32)> {
+fn read_le_u16(bytes: &[u8]) -> u16 {
+    u16::from_le_bytes([bytes[0], bytes[1]])
+}
+
+fn read_le_u32(bytes: &[u8]) -> u32 {
+    u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
+}
+
+fn find_sequence(cursor: &mut Cursor<&[u8]>, sequence: &[u8]) -> Option<usize> {
+    let buffer = cursor.get_ref();
+    let seq_len = sequence.len();
+    buffer.windows(seq_len).position(|window| window == sequence)
+}
+
+fn png_size(cursor: &mut Cursor<&[u8]>) -> PyResult<(u32, u32)> {
     const IHDR_CHUNK: &[u8; 4] = b"IHDR";
-    let mut index = 8;
-    let png_len = png_bytes.len();
-
-    while index < png_len {
-        let length = read_u32(png_bytes, index) as usize;
-        let chunk_type = &png_bytes[index + 4..index + 8];
-
-        if chunk_type == IHDR_CHUNK {
-            let width = read_u32(png_bytes, index + 8);
-            let height = read_u32(png_bytes, index + 12);
-            return Ok((width, height));
-        }
-        index += 8 + length + 4;
-    }
-
-    Err(PyValueError::new_err("PNG - IHDR segment not found"))
+    let index = match find_sequence(cursor, IHDR_CHUNK) {
+        Some(index) => index,
+        None => return Err(PyValueError::new_err("PNG - Segment IHDR not found"))
+    };
+    let width = read_u32(&cursor.get_ref()[index + 4..index + 8]);
+    let height = read_u32(&cursor.get_ref()[index + 8..index + 12]);
+    Ok((width, height))
 }
 
-/// Extracts the width and height from JPEG bytes.
-///
-/// # Arguments
-///
-/// * `jpeg_bytes` - Byte array representing the JPEG file.
-///
-/// # Returns
-///
-/// A tuple `(width, height)` if the SOF0 segment is found, otherwise an error.
-fn jpeg_size(jpeg_bytes: &[u8]) -> PyResult<(u32, u32)> {
-    let mut index = 2;
-    let jpeg_len = jpeg_bytes.len();
+fn jpeg_size(cursor: &mut Cursor<&[u8]>) -> PyResult<(u32, u32)> {
+    const SOF0: &[u8; 2] = &[0xFF, 0xC0];
+    const SOF2: &[u8; 2] = &[0xFF, 0xC2];
 
-    while index < jpeg_len {
-        if jpeg_bytes[index] != 0xFF {
-            return Err(PyValueError::new_err("JPEG - could not find marker"));
-        }
+    let index = match find_sequence(cursor, SOF0) {
+        Some(position) => position,
+        None => match find_sequence(cursor, SOF2) {
+            Some(position) => position,
+            None => return Err(PyValueError::new_err("Unsupported JPEG format")),
+        },
+    };
 
-        let marker = &jpeg_bytes[index..index + 2];
-        if marker == [0xFF, 0xC0] { // SOF0 (Start of Frame)
-            let height = read_u16(jpeg_bytes, index + 5);
-            let width = read_u16(jpeg_bytes, index + 7);
-            return Ok((width as u32, height as u32));
-        }
-        let length = read_u16(jpeg_bytes, index + 2);
-        index += 2 + length as usize;
-    }
-
-    Err(PyValueError::new_err("JPEG - SOF0 segment not found"))
+    let width = read_u16(&cursor.get_ref()[index + 5..index + 7]) as u32;
+    let height = read_u16(&cursor.get_ref()[index + 7..index + 9]) as u32;
+    Ok((width, height))
 }
 
-/// Extracts the width and height from WEBP bytes.
-///
-/// # Arguments
-///
-/// * `webp_bytes` - Byte array representing the WEBP file.
-///
-/// # Returns
-///
-/// A tuple `(width, height)` if the VP8 or VP8L segment is found, otherwise an error.
-fn webp_size(webp_bytes: &[u8]) -> PyResult<(u32, u32)> {
-    const VP8_HEADER: &[u8] = b"VP8 ";
-    const VP8L_HEADER: &[u8] = b"VP8L";
-    let mut index = 12;
-    let webp_len = webp_bytes.len();
+fn webp_size(cursor: &mut Cursor<&[u8]>) -> PyResult<(u32, u32)> {
+    const VP8: &[u8; 3] = b"VP8";
 
-    while index < webp_len {
-        let chunk_type = &webp_bytes[index..index + 4];
-        let chunk_size = read_u32(webp_bytes, index + 4) as usize;
-
-        if chunk_type == VP8_HEADER && chunk_size >= 10 {
-            let width = read_u16(webp_bytes, index + 26) & 0x3FFF;
-            let height = read_u16(webp_bytes, index + 28) & 0x3FFF;
-            return Ok((width as u32, height as u32));
-        }
-
-        if chunk_type == VP8L_HEADER && chunk_size >= 5 {
-            let b0 = webp_bytes[index + 9] as u32;
-            let b1 = webp_bytes[index + 10] as u32;
-            let b2 = webp_bytes[index + 11] as u32;
-            let b3 = webp_bytes[index + 12] as u32;
-            let width = 1 + (((b1 & 0x3F) << 8) | b0);
-            let height = 1 + (((b3 & 0xF) << 10) | (b2 << 2) | ((b1 & 0xC0) >> 6));
-            return Ok((width, height));
-        }
-
-        index += 8 + chunk_size + (chunk_size % 2);
-    }
-
-    Err(PyValueError::new_err("WEBP - Segment VP8 or VP8L not found"))
+    let index = match find_sequence(cursor, VP8) {
+        Some(index) => index,
+        None => return Err(PyValueError::new_err("WEBP - Segment VP8 not found"))
+    };
+    let prefix = &cursor.get_ref()[index + 3];
+    return if prefix == &76 {
+        let header = read_le_u32(&cursor.get_ref()[index + 9..index + 13]);
+        let width = (1 + header) & 0x3FFF;
+        let height = (1 + (header >> 14)) & 0x3FFF;
+        Ok((width, height))
+    } else if prefix == &120 {
+        Err(PyValueError::new_err("WEBP - Unsupported VP8X format"))
+    } else {
+        let width =
+            (read_le_u16(&cursor.get_ref()[index + 14..index + 16]) & 0x3FFF) as u32;
+        let height =
+            (read_le_u16(&cursor.get_ref()[index + 16..index + 18]) & 0x3FFF) as u32;
+        Ok((width, height))
+    };
 }
 
-/// Determines the size of an image given its file path.
-///
-/// # Arguments
-///
-/// * `img_path` - Path to the image file.
-///
-/// # Returns
-///
-/// A tuple `(width, height)` representing the dimensions of the image.
-///
-/// # Errors
-///
-/// Returns an error if the file cannot be read or if the image format is unsupported.
 pub fn path_to_size(img_path: &Path) -> PyResult<(u32, u32)> {
     let file_bytes = match FileBuffer::open(img_path) {
         Ok(buffer) => buffer.to_vec(),
         Err(err) => return Err(PyOSError::new_err(format!("Error reading file: {}", err))),
     };
     let signature = &file_bytes[0..4];
+    let mut cursor: Cursor<&[u8]> = Cursor::new(&file_bytes);
     match signature {
-        [137, 80, 78, 71] => png_size(&file_bytes),
-        [255, 216, 255, 224] => jpeg_size(&file_bytes),
-        [82, 73, 70, 70] => webp_size(&file_bytes),
+        [137, 80, 78, 71] => png_size(&mut cursor),
+        [255, 216, 255, 224] => jpeg_size(&mut cursor),
+        [82, 73, 70, 70] => webp_size(&mut cursor),
         _ => Err(PyValueError::new_err("Unsupported image format"))
     }
 }
