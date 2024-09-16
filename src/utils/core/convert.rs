@@ -53,14 +53,6 @@ pub(crate) fn u16_to_u8(bytes: &[u8]) -> Vec<u8> {
     img_uint
 }
 
-// pub(crate) fn f32_to_u8(bytes: &[f32]) -> Vec<u8> {
-//     let mut floats = vec![0; bytes.len()];
-//     floats
-//         .iter_mut()
-//         .zip(bytes.iter())
-//         .for_each(|(f, &b)| *f = if b == 0.0 { b as u8 } else { (b * 255.0) as u8 });
-//     floats
-// }
 
 pub(crate) fn rgb2arrayf32(img: RgbImage) -> Array3<f32> {
     let (width, height) = img.dimensions();

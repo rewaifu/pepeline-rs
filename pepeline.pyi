@@ -9,13 +9,17 @@ import numpy as np
 
 class ImgColor(Enum):
     GRAY = 0,
-    RGB = 1,
-    DYNAMIC = 2
+    AGRAY = 1,
+    RGB = 2,
+    RGBA = 3,
+    DYNAMIC = 4
 
 
 class ImgFormat(Enum):
     U8 = 0,
-    F32 = 1
+    F32 = 1,
+    U16 = 2,
+    DYNAMIC = 3
 
 
 class TypeNoise(Enum):
