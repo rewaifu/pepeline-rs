@@ -1,13 +1,13 @@
 use crate::utils::core::enums::ResizeFilters;
-use crate::utils::image::resize::resize_image;
 use bytemuck::cast_slice;
 use fast_image_resize::images::{Image, ImageRef};
-use fast_image_resize::{FilterType, PixelType, ResizeAlg};
+use fast_image_resize::{FilterType, PixelType, ResizeAlg, ResizeOptions, Resizer};
 use image::EncodableLayout;
-use ndarray::{Array2, Array3};
-use numpy::{PyArrayDyn, PyReadonlyArrayDyn, ToPyArray};
-use pyo3::{pyfunction, Py, PyResult, Python};
+use ndarray::Ix;
+use numpy::{PyArray, PyArrayMethods, PyReadonlyArrayDyn, PyUntypedArrayMethods};
+use pyo3::{pyfunction, IntoPy,  PyObject, PyResult, Python};
 use std::error::Error;
+
 fn img_shape_to_pixel_type(img_shape: &[usize]) -> PixelType {
     if img_shape.len() == 2 {
         PixelType::F32
@@ -61,44 +61,18 @@ pub fn resize_img<'py>(
     conv: Option<bool>,
     sampling: Option<u8>,
     py: Python,
-) -> PyResult<Py<PyArrayDyn<f32>>> {
-    let array = input.as_array().to_owned();
-    let shape = array.shape().to_vec();
+) -> PyResult<PyObject> {
+    let shape = input.shape();
     let pixel_type = img_shape_to_pixel_type(&shape);
     let mut resize = Image::new(size.0, size.1, pixel_type);
-    let img = array.into_raw_vec();
+    let img = input.to_vec()?;
     let img = ImageRef::new(shape[1] as u32, shape[0] as u32, img.as_bytes(), pixel_type).unwrap();
-    resize_image(
-        &img,
-        get_res_opt(
-            &filter.unwrap_or(ResizeFilters::Nearest),
-            conv.unwrap_or(false),
-            sampling,
-        )
-        .unwrap_or(ResizeAlg::Nearest),
-        &mut resize,
-    )
-    .unwrap();
+    let mut resizer = Resizer::new();
+    resizer.resize(&img, &mut resize, &ResizeOptions::new().resize_alg(get_res_opt(&filter.unwrap_or(ResizeFilters::Nearest),conv.is_some(),sampling).unwrap())).unwrap();
     let result_vec = resize.buffer();
     if shape.get(2).is_some() {
-        Ok(unsafe {
-            Array3::from_shape_vec_unchecked(
-                [size.1 as usize, size.0 as usize, shape[2]],
-                cast_slice(result_vec).to_vec(),
-            )
-            .into_dyn()
-        }
-        .to_pyarray_bound(py)
-        .into())
+        Ok(PyArray::from_vec_bound(py, cast_slice::<u8, f32>(result_vec).to_vec()).reshape([size.1 as Ix,size.0 as Ix,shape[2] as Ix])?.into_py(py))
     } else {
-        Ok(unsafe {
-            Array2::from_shape_vec_unchecked(
-                [size.1 as usize, size.0 as usize],
-                cast_slice(result_vec).to_vec(),
-            )
-            .into_dyn()
-        }
-        .to_pyarray_bound(py)
-        .into())
+        Ok(PyArray::from_vec_bound(py, cast_slice::<u8, f32>(result_vec).to_vec()).reshape([size.1 as Ix,size.0 as Ix])?.into_py(py))
     }
 }

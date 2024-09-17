@@ -1,6 +1,5 @@
 pub(crate) mod image {
     pub mod decode;
-    pub mod resize;
     pub mod save;
     pub mod size_decode;
 }
