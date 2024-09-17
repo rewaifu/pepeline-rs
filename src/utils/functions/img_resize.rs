@@ -68,7 +68,7 @@ pub fn resize_img<'py>(
     let img = input.to_vec()?;
     let img = ImageRef::new(shape[1] as u32, shape[0] as u32, img.as_bytes(), pixel_type).unwrap();
     let mut resizer = Resizer::new();
-    resizer.resize(&img, &mut resize, &ResizeOptions::new().resize_alg(get_res_opt(&filter.unwrap_or(ResizeFilters::Nearest),conv.is_some(),sampling).unwrap())).unwrap();
+    resizer.resize(&img, &mut resize, &ResizeOptions::new().resize_alg(get_res_opt(&filter.unwrap_or(ResizeFilters::Nearest),conv.unwrap_or(false),sampling).unwrap())).unwrap();
     let result_vec = resize.buffer();
     if shape.get(2).is_some() {
         Ok(PyArray::from_vec_bound(py, cast_slice::<u8, f32>(result_vec).to_vec()).reshape([size.1 as Ix,size.0 as Ix,shape[2] as Ix])?.into_py(py))

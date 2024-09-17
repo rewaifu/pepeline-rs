@@ -55,7 +55,7 @@ pub enum ImgFormat {
 }
 
 #[pyclass]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum ResizeFilters {
     Nearest,
     Box,
