@@ -25,7 +25,7 @@ img = cvt_color(img, CvtType.CMYK2RGB)
 save(img, "out.png")
 ```
 # TODO:
-- resize❓
+- resize✅
 - documentation ♻️
 - refactoring ♻️
 - add tests ♻️
