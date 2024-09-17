@@ -1,9 +1,8 @@
+use filebuffer::FileBuffer;
+use pyo3::exceptions::{PyOSError, PyValueError};
+use pyo3::prelude::*;
 use std::io::Cursor;
 use std::path::Path;
-use filebuffer::FileBuffer;
-use pyo3::prelude::*;
-use pyo3::exceptions::{PyOSError, PyValueError};
-
 
 fn read_u32(bytes: &[u8]) -> u32 {
     u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
@@ -24,14 +23,16 @@ fn read_le_u32(bytes: &[u8]) -> u32 {
 fn find_sequence(cursor: &mut Cursor<&[u8]>, sequence: &[u8]) -> Option<usize> {
     let buffer = cursor.get_ref();
     let seq_len = sequence.len();
-    buffer.windows(seq_len).position(|window| window == sequence)
+    buffer
+        .windows(seq_len)
+        .position(|window| window == sequence)
 }
 
 fn png_size(cursor: &mut Cursor<&[u8]>) -> PyResult<(u32, u32)> {
     const IHDR_CHUNK: &[u8; 4] = b"IHDR";
     let index = match find_sequence(cursor, IHDR_CHUNK) {
         Some(index) => index,
-        None => return Err(PyValueError::new_err("PNG - Segment IHDR not found"))
+        None => return Err(PyValueError::new_err("PNG - Segment IHDR not found")),
     };
     let width = read_u32(&cursor.get_ref()[index + 4..index + 8]);
     let height = read_u32(&cursor.get_ref()[index + 8..index + 12]);
@@ -60,7 +61,7 @@ fn webp_size(cursor: &mut Cursor<&[u8]>) -> PyResult<(u32, u32)> {
 
     let index = match find_sequence(cursor, VP8) {
         Some(index) => index,
-        None => return Err(PyValueError::new_err("WEBP - Segment VP8 not found"))
+        None => return Err(PyValueError::new_err("WEBP - Segment VP8 not found")),
     };
     let prefix = &cursor.get_ref()[index + 3];
     return if prefix == &76 {
@@ -71,10 +72,8 @@ fn webp_size(cursor: &mut Cursor<&[u8]>) -> PyResult<(u32, u32)> {
     } else if prefix == &120 {
         Err(PyValueError::new_err("WEBP - Unsupported VP8X format"))
     } else {
-        let width =
-            (read_le_u16(&cursor.get_ref()[index + 14..index + 16]) & 0x3FFF) as u32;
-        let height =
-            (read_le_u16(&cursor.get_ref()[index + 16..index + 18]) & 0x3FFF) as u32;
+        let width = (read_le_u16(&cursor.get_ref()[index + 14..index + 16]) & 0x3FFF) as u32;
+        let height = (read_le_u16(&cursor.get_ref()[index + 16..index + 18]) & 0x3FFF) as u32;
         Ok((width, height))
     };
 }
@@ -90,6 +89,6 @@ pub fn path_to_size(img_path: &Path) -> PyResult<(u32, u32)> {
         [137, 80, 78, 71] => png_size(&mut cursor),
         [255, 216, 255, 224] => jpeg_size(&mut cursor),
         [82, 73, 70, 70] => webp_size(&mut cursor),
-        _ => Err(PyValueError::new_err("Unsupported image format"))
+        _ => Err(PyValueError::new_err("Unsupported image format")),
     }
 }

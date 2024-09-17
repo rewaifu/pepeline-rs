@@ -1,5 +1,6 @@
 pub(crate) mod image {
     pub mod decode;
+    pub mod resize;
     pub mod save;
     pub mod size_decode;
 }
@@ -25,4 +26,5 @@ pub(crate) mod functions {
     pub mod core_funcion;
     pub mod halftone_function;
     pub mod img_function;
+    pub mod img_resize;
 }

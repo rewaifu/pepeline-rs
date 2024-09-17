@@ -45,11 +45,24 @@ pub enum TypeDot {
 pub enum ImgColor {
     GRAY = 0,
     RGB = 1,
-    DYNAMIC = 2
+    DYNAMIC = 2,
 }
 #[pyclass]
 #[derive(Clone, Copy)]
 pub enum ImgFormat {
     U8 = 0,
-    F32 = 1
+    F32 = 1,
+}
+
+#[pyclass]
+#[derive(Clone, Copy)]
+pub enum ResizeFilters {
+    Nearest,
+    Box,
+    Bilinear,
+    Hamming,
+    CatmullRom,
+    Mitchell,
+    Gaussian,
+    Lanczos3,
 }
