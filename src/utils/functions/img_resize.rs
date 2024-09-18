@@ -62,17 +62,18 @@ pub fn resize_img<'py>(
     sampling: Option<u8>,
     py: Python,
 ) -> PyResult<PyObject> {
-    let shape = input.shape();
+    let array = input.as_array().to_owned();
+    let shape = array.shape().to_vec();
     let pixel_type = img_shape_to_pixel_type(&shape);
     let mut resize = Image::new(size.0, size.1, pixel_type);
-    let img = input.to_vec()?;
+    let img = array.into_raw_vec();
     let img = ImageRef::new(shape[1] as u32, shape[0] as u32, img.as_bytes(), pixel_type).unwrap();
     let mut resizer = Resizer::new();
     resizer.resize(&img, &mut resize, &ResizeOptions::new().resize_alg(get_res_opt(&filter.unwrap_or(ResizeFilters::Nearest),conv.unwrap_or(false),sampling).unwrap())).unwrap();
-    let result_vec = resize.buffer();
+    let result_vec:&[f32] = cast_slice(resize.buffer());
     if shape.get(2).is_some() {
-        Ok(PyArray::from_vec_bound(py, cast_slice::<u8, f32>(result_vec).to_vec()).reshape([size.1 as Ix,size.0 as Ix,shape[2] as Ix])?.into_py(py))
+        Ok(PyArray::from_vec_bound(py, result_vec.to_vec()).to_dyn().reshape([size.1 as Ix,size.0 as Ix,shape[2] as Ix])?.into_py(py))
     } else {
-        Ok(PyArray::from_vec_bound(py, cast_slice::<u8, f32>(result_vec).to_vec()).reshape([size.1 as Ix,size.0 as Ix])?.into_py(py))
+        Ok(PyArray::from_vec_bound(py, result_vec.to_vec()).to_dyn().reshape([size.1 as Ix,size.0 as Ix])?.into_py(py))
     }
 }
