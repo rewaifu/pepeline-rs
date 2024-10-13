@@ -79,11 +79,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Python environment
+        run: python3 -m venv venv
+      - name: Activate environment and install dependencies
+        run: |
+          source venv/bin/activate
+          pip install maturin
       - name: Build sdist
-        uses: PyO3/maturin-action@v1
-        with:
-          command: sdist
-          args: --out dist --manifest-path Cargo.toml
+        run: |
+          source venv/bin/activate
+          maturin sdist --out dist --manifest-path Cargo.toml
       - name: Upload sdist
         uses: actions/upload-artifact@v3
         with:
