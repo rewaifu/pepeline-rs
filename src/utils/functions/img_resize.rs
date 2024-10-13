@@ -4,7 +4,7 @@ use fast_image_resize::images::{Image, ImageRef};
 use fast_image_resize::{FilterType, PixelType, ResizeAlg, ResizeOptions, Resizer};
 use image::EncodableLayout;
 use ndarray::Ix;
-use numpy::{PyArray, PyArrayMethods, PyReadonlyArrayDyn, PyUntypedArrayMethods};
+use numpy::{PyArray, PyArrayMethods, PyReadonlyArrayDyn};
 use pyo3::{pyfunction, IntoPy,  PyObject, PyResult, Python};
 use std::error::Error;
 

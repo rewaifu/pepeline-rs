@@ -165,7 +165,7 @@ pub fn best_tile(input: PyReadonlyArray2<f32>, tile_size: usize) -> PyResult<(us
                 if best_tile[0] < mean_intensity {
                     best_tile[0] = mean_intensity;
                     best_tile[1] = row as f32;
-                    best_tile[2] = col as f32;
+                    best_tile[2] =  (img_shape.1 - col-tile_size) as f32;
                 }
             }
             let mean_up = laplacian_abs.slice(s![row, 0..tile_size]).sum();
