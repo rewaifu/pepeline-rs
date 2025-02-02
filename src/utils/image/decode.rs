@@ -4,9 +4,6 @@ use std::path::Path;
 
 use filebuffer::FileBuffer;
 use ndarray::{Array2, Array3, ArrayD};
-use zune_jpeg::zune_core::colorspace::ColorSpace;
-use zune_jpeg::zune_core::options::DecoderOptions;
-use zune_jpeg::JpegDecoder;
 use zune_psd::PSDDecoder;
 
 use crate::utils::core::convert::{
@@ -47,61 +44,7 @@ pub(crate) fn gray_img_openf32(bytes: &[u8]) -> Result<Array2<f32>, Box<dyn Erro
     Ok(luma2arrayf32(img_luma))
 }
 
-pub(crate) fn jpg_gray_img_open(file: &[u8]) -> Result<Array2<u8>, Box<dyn Error>> {
-    let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::Luma);
-    let mut decoder = JpegDecoder::new_with_options(file, options);
-    decoder
-        .decode_headers()
-        .map_err(|e| Box::new(e) as Box<dyn Error>)?;
-    let image_info = decoder.info().ok_or("Failed to get image info")?;
-    let pixels = decoder
-        .decode()
-        .map_err(|e| Box::new(e) as Box<dyn Error>)?;
-    Ok(Array2::from_shape_vec(
-        (image_info.height as usize, image_info.width as usize),
-        pixels,
-    )?)
-}
 
-pub(crate) fn jpg_rgb_img_open(file: &[u8]) -> Result<Array3<u8>, Box<dyn Error>> {
-    let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::RGB);
-    let mut decoder = JpegDecoder::new_with_options(file, options);
-    decoder.decode_headers()?;
-    let image_info = decoder.info().ok_or("error read image info")?;
-    let pixels = decoder
-        .decode()
-        .map_err(|e| Box::new(e) as Box<dyn Error>)?;
-    Ok(Array3::from_shape_vec(
-        (image_info.height as usize, image_info.width as usize, 3),
-        pixels,
-    )?)
-}
-
-pub(crate) fn jpg_gray_img_openf32(file: &[u8]) -> Result<Array2<f32>, Box<dyn Error>> {
-    let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::Luma);
-    let mut decoder = JpegDecoder::new_with_options(file, options);
-    decoder.decode_headers()?;
-    let image_info = decoder.info().ok_or("error read image info")?;
-    let pixels = decoder.decode()?;
-    let pixels = u8_to_f32(&pixels);
-    Ok(Array2::from_shape_vec(
-        (image_info.height as usize, image_info.width as usize),
-        pixels,
-    )?)
-}
-
-pub(crate) fn jpg_rgb_img_openf32(file: &[u8]) -> Result<Array3<f32>, Box<dyn Error>> {
-    let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::RGB);
-    let mut decoder = JpegDecoder::new_with_options(file, options);
-    decoder.decode_headers()?;
-    let image_info = decoder.info().ok_or("error read image info")?;
-    let pixels = decoder.decode()?;
-    let pixels = u8_to_f32(&pixels);
-    Ok(Array3::from_shape_vec(
-        (image_info.height as usize, image_info.width as usize, 3),
-        pixels,
-    )?)
-}
 
 fn decode_size_psd(bytes: &[u8]) -> (u32, u32) {
     let mut height: u32 = 0;
@@ -280,16 +223,6 @@ pub fn all_read_u8(path: &Path, mode: ImgColor) -> Result<ArrayD<u8>, Box<dyn Er
     let img = FileBuffer::open(path).map_err(|err| Box::new(err) as Box<dyn Error>)?;
     let img_magic_byte = &img[..4];
     match img_magic_byte {
-        [255, 216, 255, 224] | [255, 216, 255, 225] => match &img[6..8] {
-            [74, 70] | [69, 120] => match mode {
-                ImgColor::GRAY => Ok(gray_img_open(&img)?.into_dyn()),
-                ImgColor::RGB | ImgColor::DYNAMIC => Ok(rgb_img_open(&img)?.into_dyn()),
-            },
-            _ => match mode {
-                ImgColor::GRAY => Ok(jpg_gray_img_open(&img)?.into_dyn()),
-                ImgColor::RGB | ImgColor::DYNAMIC => Ok(jpg_rgb_img_open(&img)?.into_dyn()),
-            },
-        },
         [56, 66, 80, 83] => match mode {
             ImgColor::GRAY => Ok(psd_gray_decode(&img)?.into_dyn()),
             ImgColor::RGB => Ok(psd_rgb_decode(&img)?.into_dyn()),
@@ -306,16 +239,6 @@ pub fn all_read_f32(path: &Path, mode: ImgColor) -> Result<ArrayD<f32>, Box<dyn 
     let img = FileBuffer::open(path).map_err(|err| Box::new(err) as Box<dyn Error>)?;
     let img_magic_byte = &img[..4];
     match img_magic_byte {
-        [255, 216, 255, 224] | [255, 216, 255, 225] => match &img[6..8] {
-            [74, 70] | [69, 120] => match mode {
-                ImgColor::GRAY => Ok(gray_img_openf32(&img)?.into_dyn()),
-                ImgColor::RGB | ImgColor::DYNAMIC => Ok(rgb_img_openf32(&img)?.into_dyn()),
-            },
-            _ => match mode {
-                ImgColor::GRAY => Ok(jpg_gray_img_openf32(&img)?.into_dyn()),
-                ImgColor::RGB | ImgColor::DYNAMIC => Ok(jpg_rgb_img_openf32(&img)?.into_dyn()),
-            },
-        },
         [56, 66, 80, 83] => match mode {
             ImgColor::GRAY => Ok(psd_gray32_decode(&img)?.into_dyn()),
             ImgColor::RGB => Ok(psd_rgb32_decode(&img)?.into_dyn()),

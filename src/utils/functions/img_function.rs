@@ -3,7 +3,7 @@ use std::path::Path;
 use crate::utils::core::enums::{ImgColor, ImgFormat};
 use numpy::{PyReadonlyArrayDyn, ToPyArray};
 use pyo3::exceptions::{PyOSError, PyTypeError};
-use pyo3::{pyfunction, PyErr, PyObject, PyResult, Python};
+use pyo3::{pyfunction, IntoPy, IntoPyObject, IntoPyObjectExt, PyErr, PyObject, PyResult, Python};
 
 use crate::utils::image::decode::{all_read_f32, all_read_u8};
 use crate::utils::image::save::save_img_vec;
@@ -64,14 +64,14 @@ pub fn read(
 
     match format {
         ImgFormat::F32 => match all_read_f32(path, mode) {
-            Ok(array) => Ok(array.to_pyarray_bound(py).into()),
+            Ok(array) => Ok(array.to_pyarray(py).into_py(py)),
             Err(err) => Err(PyErr::new::<PyOSError, _>(format!(
                 "Error reading file: {}",
                 err
             ))),
         },
         ImgFormat::U8 => match all_read_u8(path, mode) {
-            Ok(array) => Ok(array.to_pyarray_bound(py).into()),
+            Ok(array) => Ok(array.to_pyarray(py).into_py(py)),
             Err(err) => Err(PyErr::new::<PyOSError, _>(format!(
                 "Error reading file: {}",
                 err

@@ -8,7 +8,7 @@ mod utils;
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn pepeline(_py: Python, m: &PyModule) -> PyResult<()> {
+fn pepeline(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(img_function::read, m)?)?;
     m.add_function(wrap_pyfunction!(img_function::read_size, m)?)?;
     m.add_function(wrap_pyfunction!(halftone_function::screentone, m)?)?;

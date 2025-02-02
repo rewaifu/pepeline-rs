@@ -18,7 +18,7 @@ use crate::utils::halftone::screentone_add::{screentone_add, screentone_rotate_a
 //     let mut array = input.as_array().to_owned();
 //     halftone_add(&mut array, halftone);
 //
-//     Ok(array.to_pyarray_bound(py).into())
+//     Ok(array.to_pyarray(py).into())
 // }
 
 #[pyfunction]
@@ -42,5 +42,5 @@ pub fn screentone<'py>(
         screentone_add(&mut array, dot_size, dot_type);
     }
 
-    Ok(array.to_pyarray_bound(py).into())
+    Ok(array.to_pyarray(py).into())
 }

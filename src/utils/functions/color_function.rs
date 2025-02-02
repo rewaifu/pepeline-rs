@@ -24,7 +24,7 @@ pub fn fast_color_level<'py>(
     let mut array = input.as_array().to_owned();
 
     levels(&mut array, in_low, in_high, out_low, out_high, gamma);
-    Ok(array.to_pyarray_bound(py).into())
+    Ok(array.to_pyarray(py).into())
 }
 
 #[pyfunction]
@@ -66,5 +66,5 @@ pub fn cvt_color<'py>(
         }
     };
 
-    Ok(array.to_pyarray_bound(py).into())
+    Ok(array.to_pyarray(py).into())
 }

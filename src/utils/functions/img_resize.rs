@@ -72,8 +72,8 @@ pub fn resize_img<'py>(
     resizer.resize(&img, &mut resize, &ResizeOptions::new().resize_alg(get_res_opt(&filter.unwrap_or(ResizeFilters::Nearest),conv.unwrap_or(false),sampling).unwrap())).unwrap();
     let result_vec:&[f32] = cast_slice(resize.buffer());
     if shape.get(2).is_some() {
-        Ok(PyArray::from_vec_bound(py, result_vec.to_vec()).to_dyn().reshape([size.1 as Ix,size.0 as Ix,shape[2] as Ix])?.into_py(py))
+        Ok(PyArray::from_vec(py, result_vec.to_vec()).to_dyn().reshape([size.1 as Ix,size.0 as Ix,shape[2] as Ix])?.into_py(py))
     } else {
-        Ok(PyArray::from_vec_bound(py, result_vec.to_vec()).to_dyn().reshape([size.1 as Ix,size.0 as Ix])?.into_py(py))
+        Ok(PyArray::from_vec(py, result_vec.to_vec()).to_dyn().reshape([size.1 as Ix,size.0 as Ix])?.into_py(py))
     }
 }
