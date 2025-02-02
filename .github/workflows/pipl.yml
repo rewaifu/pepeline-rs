@@ -25,7 +25,7 @@ jobs:
           args: --release --out dist --interpreter=python${{ matrix.py }} --manifest-path Cargo.toml
           manylinux: auto
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: dist
@@ -48,7 +48,7 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --interpreter=python${{ matrix.py }} --manifest-path Cargo.toml
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: dist
